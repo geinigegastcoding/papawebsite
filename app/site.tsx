@@ -69,6 +69,23 @@ export function Header() {
         <a className="header-cta" href="/contact">
           Vrijblijvend kennismaken
         </a>
+        <details className="mobile-menu">
+          <summary aria-label="Menu openen">
+            <span />
+            <span />
+            <span />
+          </summary>
+          <nav className="mobile-nav-links" aria-label="Mobiele navigatie">
+            {navItems.map((item) => (
+              <a key={item.href} href={item.href}>
+                {item.label}
+              </a>
+            ))}
+            <a className="mobile-nav-cta" href="/contact">
+              Vrijblijvend kennismaken
+            </a>
+          </nav>
+        </details>
       </div>
     </header>
   );
