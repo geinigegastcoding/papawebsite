@@ -1,10 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
-  <rect width="128" height="128" rx="28" fill="#08111f"/>
-  <path d="M28 88V40h16l20 27 20-27h16v48H84V63L64 88 44 63v25H28Z" fill="url(#grad)"/>
-  <defs>
-    <linearGradient id="grad" x1="24" y1="32" x2="102" y2="96" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#5EF0C4"/>
-      <stop offset="1" stop-color="#54C7FF"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Magis Data Intelligence">
+  <rect width="64" height="64" rx="12" fill="#06162a"/>
+  <path d="M14 48V16l18 18 18-18v32" fill="none" stroke="#2f94df" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 48V31l10 10 10-10v17" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".88"/>
 </svg>

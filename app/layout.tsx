@@ -5,13 +5,9 @@ import "@fontsource/space-grotesk/latin.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://magis-data-intelligence.nl"),
-  title: {
-    default: "Magis Data Intelligence",
-    template: "%s | Magis Data Intelligence",
-  },
+  title: "Magis Data Intelligence | Van data naar slimme beslissingen",
   description:
-    "Data-analyse en informatievoorziening door Gerhard Magis. Van rauwe data naar heldere sturing, dashboards en strategische inzichten.",
+    "Data-analyse, managementinformatie, dashboards en strategisch advies door Gerhard Magis, PhD.",
 };
 
 export default function RootLayout({
@@ -21,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl">
-      <body className="bg-[var(--color-ink)] text-white antialiased">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
