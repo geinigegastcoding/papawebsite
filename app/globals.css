@@ -577,6 +577,183 @@ a {
   margin-top: 34px;
 }
 
+.recommendations-section {
+  background:
+    linear-gradient(180deg, var(--paper), #f8fbff 52%, #fdf8ef 100%);
+  border-top: 1px solid rgba(47, 148, 223, 0.08);
+  border-bottom: 1px solid rgba(47, 148, 223, 0.08);
+}
+
+.recommendations-panel {
+  position: relative;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f6f9fc, #f8f3ea);
+  border: 1px solid rgba(177, 146, 94, 0.18);
+  padding: 18px;
+  box-shadow: 0 22px 44px rgba(9, 30, 66, 0.08);
+}
+
+.recommendations-topline,
+.recommendations-carousel {
+  background: var(--white);
+}
+
+.recommendations-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  align-items: end;
+  border-radius: 14px 14px 0 0;
+  padding: 34px 34px 22px;
+}
+
+.recommendations-topline h2 {
+  max-width: 700px;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 36px;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.recommendations-score {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  color: var(--ink);
+}
+
+.recommendations-score strong {
+  font-family: var(--font-heading);
+  font-size: 48px;
+  line-height: 0.9;
+}
+
+.stars {
+  color: #d7901d;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+}
+
+.recommendations-score span:last-child {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.recommendations-carousel {
+  position: relative;
+  border-radius: 0 0 14px 14px;
+  padding: 8px 0 22px;
+}
+
+.recommendations-viewport {
+  overflow: hidden;
+  padding-inline: 18px;
+}
+
+.recommendations-lane {
+  display: flex;
+  width: max-content;
+  animation: recommendations-scroll 42s linear infinite;
+}
+
+.recommendations-group {
+  display: flex;
+  gap: 14px;
+  padding-right: 14px;
+}
+
+.recommendation-card {
+  display: flex;
+  width: 340px;
+  min-height: 196px;
+  flex-direction: column;
+  justify-content: flex-start;
+  border: 1px solid rgba(177, 191, 209, 0.78);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 18px 18px 16px;
+  box-shadow: 0 10px 24px rgba(9, 30, 66, 0.04);
+}
+
+.recommendation-head {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.recommendation-meta {
+  min-width: 0;
+}
+
+.review-avatar {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 3px solid #e9d6b1;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #355c7d, #5f88ab);
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.recommendation-quote {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+.recommendation-card h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.recommendation-meta p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.recommendation-card span {
+  display: block;
+  margin-top: auto;
+  color: var(--blue-dark);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.recommendations-lane:hover {
+  animation-play-state: paused;
+}
+
+@keyframes recommendations-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% + 7px));
+  }
+}
+
 .expertise-card {
   display: flex;
   min-height: 116px;
@@ -1245,6 +1422,10 @@ a {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .recommendation-card {
+    width: 320px;
+  }
+
   .credential-list {
     border-left: 0;
     padding-left: 0;
@@ -1466,6 +1647,39 @@ a {
   .process-photo-row,
   .footer-grid {
     grid-template-columns: 1fr;
+  }
+
+  .recommendations-panel {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .recommendations-topline {
+    display: grid;
+    gap: 18px;
+    padding: 26px 22px 18px;
+  }
+
+  .recommendations-topline h2 {
+    font-size: 28px;
+  }
+
+  .recommendations-score {
+    justify-items: start;
+  }
+
+  .recommendations-carousel {
+    padding: 8px 0 20px;
+  }
+
+  .recommendations-viewport {
+    padding-inline: 14px;
+  }
+
+  .recommendation-card {
+    width: 286px;
+    min-height: 188px;
+    padding: 16px;
   }
 
   .service-card,

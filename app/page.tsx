@@ -93,6 +93,64 @@ const visualStories = [
   },
 ];
 
+const recommendations = [
+  {
+    name: "Marco Ruiter",
+    initials: "MR",
+    role: "Directeur Strategische Partnerships bij Dedimo",
+    date: "30 november 2016",
+    relation: "werkte met Gerhard in hetzelfde team",
+    summary:
+      "Inhoudelijk sterk, prettig in omgang, en bouwer van complexe tools waar nog steeds mee gewerkt wordt.",
+    quote:
+      "Gerhard is een super fijne collega om mee te werken. Hij is inhoudelijk sterk en hij is een erg prettig persoon in omgang. Gerhard heeft complexe tools gebouwd voor Zilveren Kruis waar nog steeds mee gewerkt wordt.",
+  },
+  {
+    name: "Marieke Pronk",
+    initials: "MP",
+    role: "Directeur Health Contracting & Strategisch zorgadviseur",
+    date: "23 november 2016",
+    relation: "werkte met Gerhard in hetzelfde team",
+    summary:
+      "Zeer gedreven en betrokken, kritisch waar nodig, en sterk in complexe analyses begrijpelijk maken.",
+    quote:
+      "Gerhard is een fijne collega waar je op kan bouwen. Hij is zeer gedreven en betrokken, kritisch als het moet. Hij kan zeer complexe data-analyses opzetten en begrijpelijk maken voor iedereen, kan van data een goudmijn maken.",
+  },
+  {
+    name: "Guus Mulder",
+    initials: "GM",
+    role: "Business Intelligence Specialist at Zilveren Kruis",
+    date: "16 november 2016",
+    relation: "werkte met Gerhard in verschillende teams",
+    summary:
+      "Werkt op hoog analytisch niveau en kan een complex product bouwen dat breed overdraagbaar is.",
+    quote:
+      "Samen met Gerhard heb ik benchmarkinformatie voor zorgverleners van Zilveren Kruis geproduceerd. De samenwerking was prettig. Ik heb daarin Gerhard leren kennen als iemand die op hoog analytisch niveau een complex product kan maken. Dit product is nu overgedragen aan Vektis, branche-organisatie voor alle zorgverzekeraars.",
+  },
+  {
+    name: "Paul Wagenaar",
+    initials: "PW",
+    role: "Specialist Digitale contractering bij Zilveren Kruis",
+    date: "8 november 2016",
+    relation: "werkte met Gerhard in hetzelfde team",
+    summary:
+      "Sterk in complexe problemen gestructureerd analyseren en haalbare oplossingen aandragen.",
+    quote:
+      "Gerhard is goed in het gestructureerd analyseren van complexe problemen en het aandragen van haalbare oplossingen. Daarnaast is Gerhard gewoon een heel aangenaam persoon om mee samen te werken.",
+  },
+  {
+    name: "Sander van Ekeren",
+    initials: "SE",
+    role: "Strategische HR Vraagstukken | Innovatie in Arbeidsvoorwaarden en Werkgeverschap",
+    date: "8 november 2016",
+    relation: "gaf rechtstreeks leiding aan Gerhard",
+    summary:
+      "Uitstekende data-analist met eigenaarschap, betrokkenheid en liefde voor complexe vraagstukken.",
+    quote:
+      "Gerhard is een meer dan uitstekende data-/informatie analist, met een liefde voor complexe vraagstukken. Naast zijn uitmuntende analytische vaardigheden, is hij zeer betrokken bij zijn werk en toont hij eigenaarschap op de momenten die er toe doen. Hij is de eerste die ik zal benaderen als ik een ingewikkeld datagerelateerd vraagstuk moet oplossen.",
+  },
+];
+
 const faqItems = [
   ["Moet onze data al perfect op orde zijn?", "Nee. Vaak begint waarde juist met inzicht in kwaliteit, definities en ontbrekende gegevens. Dat wordt onderdeel van de analyse."],
   ["Gaat het vooral om dashboards bouwen?", "Dashboards kunnen onderdeel zijn, maar de kern is betere managementinformatie: begrijpen wat cijfers betekenen en hoe ze besluitvorming ondersteunen."],
@@ -110,6 +168,7 @@ export default function Home() {
       <ServicesStrip />
       <VisualStorySection />
       <AboutSection />
+      <RecommendationsSection />
       <ExpertiseSection />
       <CasesSection />
       <DetailedServicesSection />
@@ -239,6 +298,54 @@ function AboutSection() {
           {credentials.map((credential) => (
             <Credential key={credential}>{credential}</Credential>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RecommendationsSection() {
+  return (
+    <section className="section recommendations-section" aria-labelledby="recommendations-title">
+      <div className="site-container recommendations-panel">
+        <div className="recommendations-topline">
+          <div>
+            <p className="section-kicker dark">LinkedIn aanbevelingen</p>
+            <h2 id="recommendations-title">Vertrouwd door collega's en leidinggevenden.</h2>
+          </div>
+          <div className="recommendations-score" aria-label="Vijf aanbevelingen">
+            <strong>5</strong>
+            <span className="stars" aria-hidden="true">★★★★★</span>
+            <span>aanbevelingen</span>
+          </div>
+        </div>
+        <div className="recommendations-carousel">
+          <div className="recommendations-viewport">
+            <div className="recommendations-lane">
+              {[0, 1].map((group) => (
+                <div key={group} className="recommendations-group" aria-hidden={group === 1}>
+                  {recommendations.map((item) => (
+                    <article key={`${group}-${item.name}`} className="recommendation-card">
+                      <div className="recommendation-head">
+                        <div className="review-avatar" aria-hidden="true">
+                          {item.initials}
+                        </div>
+                        <div className="recommendation-meta">
+                          <h3>{item.name}</h3>
+                          <p>{item.role}</p>
+                        </div>
+                      </div>
+                      <div className="stars" aria-hidden="true">★★★★★</div>
+                      <p className="recommendation-quote">"{item.summary}"</p>
+                      <span>
+                        {item.date} &middot; {item.relation}
+                      </span>
+                    </article>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
