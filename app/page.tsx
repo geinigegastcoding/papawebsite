@@ -10,6 +10,7 @@ import {
   credentials,
   expertise,
   services,
+  stockImages,
 } from "./site";
 
 const caseSignals = [
@@ -60,14 +61,35 @@ const miniCases = [
   {
     title: "Kostenverschillen verklaren",
     text: "Een kostenrapportage toont afwijkingen, maar nog geen oorzaak. Analyse brengt verschillen terug naar volume, processtappen, segmenten of definities.",
+    image: stockImages.analyticsScreen,
   },
   {
     title: "Dashboard bruikbaar maken",
     text: "Een dashboard bevat veel cijfers, maar weinig richting. Door indicatoren te verscherpen ontstaat informatie die bespreekbaar is in managementoverleg.",
+    image: "/images/gerhard-dashboard.webp",
   },
   {
     title: "Risico's eerder herkennen",
     text: "Operationele signalen worden gecombineerd met historische patronen. Zo ontstaat een realistischer beeld van waar aandacht nodig is.",
+    image: stockImages.strategyMeeting,
+  },
+];
+
+const visualStories = [
+  {
+    title: "Dashboard dat stuurt",
+    text: "Van losse grafieken naar managementinformatie met focus.",
+    image: "/images/gerhard-dashboard.webp",
+  },
+  {
+    title: "Analyse met context",
+    text: "Cijfers krijgen pas waarde wanneer de organisatievraag scherp is.",
+    image: stockImages.dashboardDesk,
+  },
+  {
+    title: "Samen beslissen",
+    text: "Inzichten landen beter wanneer teams dezelfde taal spreken.",
+    image: stockImages.strategyMeeting,
   },
 ];
 
@@ -86,6 +108,7 @@ export default function Home() {
       <Header />
       <Hero />
       <ServicesStrip />
+      <VisualStorySection />
       <AboutSection />
       <ExpertiseSection />
       <CasesSection />
@@ -108,11 +131,11 @@ function Hero() {
         <div className="hero-copy">
           <p className="section-kicker">Data-analyse en managementinformatie</p>
           <h1 id="hero-title">
-            Van data naar <span>slimme beslissingen</span>
+            Data die niet ruist, maar <span>richting geeft.</span>
           </h1>
           <p className="hero-lede">
-            Ik help organisaties om ruwe data om te zetten in bruikbare inzichten die leiden tot
-            betere keuzes, efficientere processen en duurzame groei.
+            Magis helpt organisaties om cijfers te vertalen naar scherpe inzichten, betere
+            gesprekken en besluiten die met vertrouwen genomen worden.
           </p>
           <div className="hero-actions" aria-label="Belangrijkste acties">
             <a className="button button-primary" href="/contact">
@@ -164,6 +187,34 @@ function ServicesStrip() {
   );
 }
 
+function VisualStorySection() {
+  return (
+    <section className="visual-story-section" aria-labelledby="visual-story-title">
+      <div className="site-container visual-story-header">
+        <div>
+          <p className="section-kicker dark">Meer beeld, minder ruis</p>
+          <h2 id="visual-story-title">Inzicht moet u kunnen zien, niet alleen lezen.</h2>
+        </div>
+        <p>
+          Daarom draait de site om herkenbare dashboards, werksituaties en scherpe visuele
+          samenvattingen naast de inhoud.
+        </p>
+      </div>
+      <div className="site-container visual-story-grid">
+        {visualStories.map((item) => (
+          <article key={item.title} className="visual-card">
+            <img src={item.image} alt="" />
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function AboutSection() {
   return (
     <section id="over-mij" className="section about-section" aria-labelledby="about-title">
@@ -175,7 +226,7 @@ function AboutSection() {
         <div className="about-copy">
           <p className="section-kicker dark">Over mij</p>
           <h2 id="about-title">
-            Ervaring. Analytisch. <span>Betrokken.</span>
+            Senior denkkracht voor data die <span>ertoe doet.</span>
           </h2>
           <p>
             Met een achtergrond in natuurkunde, data-analyse en business consultancy help ik
@@ -219,26 +270,29 @@ function ExpertiseSection() {
 function CasesSection() {
   return (
     <section id="cases" className="section cases-section" aria-labelledby="cases-title">
-      <div className="site-container cases-grid">
+      <div className="site-container cases-grid cases-grid-visual">
         <SectionHeader
           eyebrow="Werkwijze"
-          title="Rustige analyse, heldere vertaling, bruikbaar resultaat."
+          title="Van twijfel in cijfers naar taal die teams delen."
           text="Samenwerking start bij de vraag achter de vraag: welke beslissing moet beter worden, welke informatie ontbreekt en welke definities moeten eerst scherp staan?"
         />
-        <div className="case-panel">
-          <h2 id="cases-title">Typische vraagstukken</h2>
-          <ul>
-            {caseSignals.map((signal) => (
-              <li key={signal}>
-                <CheckIcon />
-                <span>{signal}</span>
-              </li>
-            ))}
-          </ul>
-          <p>
-            Geschikt voor organisaties die al over data beschikken, maar behoefte hebben aan
-            structuur, duiding en een onafhankelijke blik.
-          </p>
+        <div className="case-media-panel">
+          <img src={stockImages.strategyMeeting} alt="Professionals bespreken data-inzichten rond een tafel" />
+          <div className="case-panel">
+            <h2 id="cases-title">Typische vraagstukken</h2>
+            <ul>
+              {caseSignals.map((signal) => (
+                <li key={signal}>
+                  <CheckIcon />
+                  <span>{signal}</span>
+                </li>
+              ))}
+            </ul>
+            <p>
+              Geschikt voor organisaties die al over data beschikken, maar behoefte hebben aan
+              structuur, duiding en een onafhankelijke blik.
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -251,9 +305,14 @@ function DetailedServicesSection() {
       <div className="site-container">
         <SectionHeader
           eyebrow="Diensten in detail"
-          title="Van analyse naar bruikbare managementinformatie."
+          title="Niet meer dashboards. Meer duidelijkheid."
           text="Elke opdracht begint bij de vraag welke keuze, prestatie of onzekerheid beter onderbouwd moet worden."
         />
+        <div className="service-visual-band" aria-label="Visuele voorbeelden van data-analyse en dashboards">
+          <img src={stockImages.dashboardDesk} alt="Laptop met analytics dashboard op een bureau" />
+          <img src="/images/gerhard-dashboard.webp" alt="Gerhard Magis naast een managementdashboard" />
+          <img src={stockImages.analyticsScreen} alt="Close-up van datavisualisatie op een scherm" />
+        </div>
         <div className="detail-list">
           {detailedServices.map((service) => (
             <article key={service.title} className="detail-block">
@@ -273,9 +332,13 @@ function HowItWorksSection() {
       <div className="site-container">
         <SectionHeader
           eyebrow="Werkwijze"
-          title="Een nuchtere aanpak met duidelijke tussenstappen."
+          title="Eerst scherpte. Dan analyse. Dan richting."
           text="De analyse wordt niet los gezien van de organisatiecontext. Dat voorkomt mooie cijfers zonder praktische betekenis."
         />
+        <div className="process-photo-row" aria-hidden="true">
+          <img src={stockImages.planningTable} alt="" />
+          <img src={stockImages.strategyMeeting} alt="" />
+        </div>
         <div className="compact-process">
           {processSteps.map(([number, title, text]) => (
             <article key={title} className="compact-step">
@@ -293,10 +356,14 @@ function HowItWorksSection() {
 function SectorsSection() {
   return (
     <section className="section" aria-labelledby="sectors-title">
-      <div className="site-container split-panel">
+      <div className="site-container sectors-visual-panel">
         <div>
           <p className="section-kicker dark">Sectoren</p>
-          <h2 id="sectors-title">Ervaring in omgevingen waar data bestuurlijke waarde heeft.</h2>
+          <h2 id="sectors-title">Waar data bestuurlijke waarde moet krijgen.</h2>
+          <div className="sector-photo-stack" aria-hidden="true">
+            <img src={stockImages.dashboardDesk} alt="" />
+            <img src="/images/gerhard-portrait.webp" alt="" />
+          </div>
         </div>
         <CheckList items={sectors} />
       </div>
@@ -310,12 +377,13 @@ function MiniCasesSection() {
       <div className="site-container">
         <SectionHeader
           eyebrow="Voorbeelden"
-          title="Typische inzichten die organisaties verder helpen."
+          title="Inzichten die het gesprek direct scherper maken."
           text="Geen standaardoplossingen, maar concrete duiding van wat de data laat zien en wat dat betekent voor keuzes."
         />
         <div className="mini-case-grid">
           {miniCases.map((item) => (
-            <article key={item.title} className="mini-case">
+            <article key={item.title} className="mini-case mini-case-image">
+              <img src={item.image} alt="" />
               <h3>{item.title}</h3>
               <p>{item.text}</p>
             </article>

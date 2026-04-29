@@ -1,3 +1,4 @@
+import { innerPageImages } from "../inner-page-images";
 import { CheckList, PageShell, credentials } from "../site";
 
 const profileFocus = [
@@ -13,6 +14,12 @@ const profileFocus = [
     title: "Onafhankelijke rol",
     text: "Als zelfstandig consultant is de blik onafhankelijk en gericht op wat de organisatie nodig heeft, niet op het verkopen van tooling.",
   },
+];
+
+const profileImages = [
+  "/images/gerhard-dashboard.webp",
+  innerPageImages.workspace,
+  innerPageImages.dashboardScreen,
 ];
 
 const goodFit = [
@@ -47,19 +54,22 @@ export default function OverMijPage() {
         </div>
       </section>
       <section className="page-section page-section-light">
-        <div className="site-container split-panel">
+        <div className="site-container split-panel page-visual-split">
           <div>
             <p className="section-kicker dark">Kenmerken</p>
             <h2>Onafhankelijk en betrokken.</h2>
           </div>
-          <CheckList
-            items={[
-              "Analytisch en gestructureerd",
-              "Onafhankelijk en betrouwbaar",
-              "Gericht op resultaat en toepasbaarheid",
-              "Werkzaam als zelfstandig consultant",
-            ]}
-          />
+          <div>
+            <CheckList
+              items={[
+                "Analytisch en gestructureerd",
+                "Onafhankelijk en betrouwbaar",
+                "Gericht op resultaat en toepasbaarheid",
+                "Werkzaam als zelfstandig consultant",
+              ]}
+            />
+            <img src="/images/gerhard-dashboard.webp" alt="Gerhard Magis bij datawerk" />
+          </div>
         </div>
       </section>
       <section className="page-section">
@@ -73,8 +83,9 @@ export default function OverMijPage() {
             </p>
           </div>
           <div className="mini-case-grid">
-            {profileFocus.map((item) => (
-              <article key={item.title} className="mini-case">
+            {profileFocus.map((item, index) => (
+              <article key={item.title} className="mini-case mini-case-image">
+                <img src={profileImages[index]} alt="Profiel en werkomgeving" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>

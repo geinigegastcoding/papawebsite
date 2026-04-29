@@ -48,13 +48,24 @@ export const expertise = [
   "Data naar managementinformatie",
 ];
 
+export const stockImages = {
+  dashboardDesk:
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+  analyticsScreen:
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+  strategyMeeting:
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+  planningTable:
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+};
+
 export function Header() {
   return (
     <header className="site-header" aria-label="Hoofdnavigatie">
       <div className="site-container header-inner">
         <a className="brand" href="/" aria-label="Magis Data Intelligence home">
           <LogoMark />
-          <span>
+          <span className="brand-copy">
             <strong>Magis</strong>
             <span>Data Intelligence</span>
           </span>
@@ -94,9 +105,47 @@ export function Header() {
 export function Footer() {
   return (
     <footer className="site-footer">
-      <div className="site-container footer-inner">
-        <p>Magis Data Intelligence</p>
-        <p>Data-analyse, managementinformatie en strategisch advies.</p>
+      <div className="site-container footer-grid">
+        <div className="footer-brand">
+          <a className="brand footer-logo" href="/" aria-label="Magis Data Intelligence home">
+            <LogoMark />
+            <span className="brand-copy">
+              <strong>Magis</strong>
+              <span>Data Intelligence</span>
+            </span>
+          </a>
+          <p>
+            Senior data-analyse, managementinformatie en advies voor organisaties die betere
+            besluiten willen nemen met wat hun data al vertelt.
+          </p>
+        </div>
+        <nav className="footer-column" aria-label="Footer navigatie">
+          <h2>Pagina's</h2>
+          {navItems.map((item) => (
+            <a key={item.href} href={item.href}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <div className="footer-column">
+          <h2>Expertise</h2>
+          <a href="/diensten">Data-analyse</a>
+          <a href="/diensten">Managementinformatie</a>
+          <a href="/expertise">Risico's en kansen</a>
+          <a href="/werkwijze">Strategisch advies</a>
+        </div>
+        <div className="footer-contact">
+          <h2>Klaar voor meer richting?</h2>
+          <p>Plan een eerste gesprek over uw data, rapportages of dashboardvraag.</p>
+          <a className="button button-primary" href="/contact">
+            Kennismaken
+            <ArrowIcon />
+          </a>
+        </div>
+      </div>
+      <div className="site-container footer-bottom">
+        <p>Copyright 2026 Magis Data Intelligence</p>
+        <p>Data naar beslissingen. Rust in cijfers. Richting in keuzes.</p>
       </div>
     </footer>
   );
@@ -198,8 +247,12 @@ export function Credential({ children }: { children: ReactNode }) {
 export function LogoMark() {
   return (
     <svg className="logo-mark" viewBox="0 0 48 48" aria-hidden="true">
-      <path d="M7 39V9l17 17L41 9v30" />
-      <path d="M15 39V24l9 9 9-9v15" />
+      <rect x="5" y="5" width="38" height="38" rx="10" />
+      <path d="M13 35V16l11 12 11-12v19" />
+      <path d="M17 35V26l7 7 7-7v9" />
+      <circle cx="13" cy="16" r="2.2" />
+      <circle cx="24" cy="28" r="2.2" />
+      <circle cx="35" cy="16" r="2.2" />
     </svg>
   );
 }

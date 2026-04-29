@@ -1,3 +1,4 @@
+import { innerPageImages } from "../inner-page-images";
 import { CheckList, InfoCard, PageShell } from "../site";
 
 const serviceBlocks = [
@@ -42,6 +43,13 @@ const engagementTypes = [
   "Adviestraject waarin analyse en managementgesprekken samenkomen",
 ];
 
+const engagementImages = [
+  innerPageImages.dashboardScreen,
+  innerPageImages.dataMeeting,
+  innerPageImages.monitoringScreen,
+  innerPageImages.deskNotes,
+];
+
 export default function DienstenPage() {
   return (
     <PageShell
@@ -57,16 +65,19 @@ export default function DienstenPage() {
         </div>
       </section>
       <section className="page-section page-section-light">
-        <div className="site-container split-panel">
+        <div className="site-container split-panel page-visual-split">
           <div>
             <p className="section-kicker dark">Praktische waarde</p>
             <h2>Gericht op toepasbaarheid.</h2>
           </div>
-          <p>
-            De focus ligt op analyses die direct bruikbaar zijn voor de organisatie: helder genoeg
-            voor management, precies genoeg voor inhoudelijke teams en concreet genoeg om op te
-            handelen.
-          </p>
+          <div>
+            <p>
+              De focus ligt op analyses die direct bruikbaar zijn voor de organisatie: helder genoeg
+              voor management, precies genoeg voor inhoudelijke teams en concreet genoeg om op te
+              handelen.
+            </p>
+            <img src={innerPageImages.dashboardScreen} alt="Dashboardoverzicht op een werkplek" />
+          </div>
         </div>
       </section>
       <section className="page-section">
@@ -89,8 +100,9 @@ export default function DienstenPage() {
             </p>
           </div>
           <div className="mini-case-grid">
-            {engagementTypes.map((item) => (
-              <article key={item} className="mini-case">
+            {engagementTypes.map((item, index) => (
+              <article key={item} className="mini-case mini-case-image">
+                <img src={engagementImages[index]} alt="Zakelijke data-analyse in de praktijk" />
                 <h3>{item}</h3>
                 <p>
                   Afbakening, planning en resultaat worden vooraf concreet gemaakt, zodat duidelijk

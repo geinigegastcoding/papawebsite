@@ -1,3 +1,4 @@
+import { innerPageImages } from "../inner-page-images";
 import { CheckList, InfoCard, PageShell, expertise } from "../site";
 
 const applications = [
@@ -22,6 +23,12 @@ const methodNotes = [
   },
 ];
 
+const methodImages = [
+  innerPageImages.monitoringScreen,
+  innerPageImages.dataMeeting,
+  innerPageImages.focusedOffice,
+];
+
 export default function ExpertisePage() {
   return (
     <PageShell
@@ -41,15 +48,21 @@ export default function ExpertisePage() {
         </div>
       </section>
       <section className="page-section page-section-light">
-        <div className="site-container split-panel">
+        <div className="site-container split-panel page-visual-split">
           <div>
             <p className="section-kicker dark">Omgevingen</p>
             <h2>Voor data-intensieve organisaties.</h2>
           </div>
-          <p>
-            Ervaring ligt vooral in situaties waar cijfers niet op zichzelf staan, maar verbonden
-            zijn met beleid, risico's, prestaties en bestuurlijke keuzes.
-          </p>
+          <div>
+            <p>
+              Ervaring ligt vooral in situaties waar cijfers niet op zichzelf staan, maar verbonden
+              zijn met beleid, risico's, prestaties en bestuurlijke keuzes.
+            </p>
+            <img
+              src={innerPageImages.monitoringScreen}
+              alt="Analyse op een scherm met datavisualisaties"
+            />
+          </div>
         </div>
       </section>
       <section className="page-section">
@@ -72,8 +85,9 @@ export default function ExpertisePage() {
             </p>
           </div>
           <div className="mini-case-grid">
-            {methodNotes.map((item) => (
-              <article key={item.title} className="mini-case">
+            {methodNotes.map((item, index) => (
+              <article key={item.title} className="mini-case mini-case-image">
+                <img src={methodImages[index]} alt="Data-expertise toegepast in overleg" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>

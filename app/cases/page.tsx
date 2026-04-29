@@ -1,3 +1,4 @@
+import { innerPageImages } from "../inner-page-images";
 import { CheckList, InfoCard, PageShell } from "../site";
 
 const cases = [
@@ -38,6 +39,12 @@ const miniCaseExplanations = [
   },
 ];
 
+const miniCaseImages = [
+  innerPageImages.dashboardScreen,
+  innerPageImages.monitoringScreen,
+  innerPageImages.dataMeeting,
+];
+
 const caseApproach = [
   "Start met de vraag die beter beantwoord moet worden",
   "Maak aannames en definities expliciet",
@@ -60,15 +67,18 @@ export default function CasesPage() {
         </div>
       </section>
       <section className="page-section page-section-light">
-        <div className="site-container split-panel">
+        <div className="site-container split-panel page-visual-split">
           <div>
             <p className="section-kicker dark">Focus</p>
             <h2>Aanpak, inzicht en impact.</h2>
           </div>
-          <p>
-            Cases tonen vooral hoe vraagstukken worden aangepakt, welke inzichten ontstaan en hoe
-            deze bijdragen aan beter onderbouwde keuzes.
-          </p>
+          <div>
+            <p>
+              Cases tonen vooral hoe vraagstukken worden aangepakt, welke inzichten ontstaan en hoe
+              deze bijdragen aan beter onderbouwde keuzes.
+            </p>
+            <img src={innerPageImages.dataMeeting} alt="Team bespreekt data-inzichten aan tafel" />
+          </div>
         </div>
       </section>
       <section className="page-section">
@@ -82,8 +92,9 @@ export default function CasesPage() {
             </p>
           </div>
           <div className="mini-case-grid">
-            {miniCaseExplanations.map((item) => (
-              <article key={item.title} className="mini-case">
+            {miniCaseExplanations.map((item, index) => (
+              <article key={item.title} className="mini-case mini-case-image">
+                <img src={miniCaseImages[index]} alt="Voorbeeld van data-inzicht in de praktijk" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>

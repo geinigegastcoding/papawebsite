@@ -1,3 +1,4 @@
+import { innerPageImages } from "../inner-page-images";
 import { ArrowIcon, CheckList, PageShell } from "../site";
 
 const preparation = [
@@ -61,12 +62,18 @@ export default function ContactPage() {
         </div>
       </section>
       <section className="page-section page-section-light">
-        <div className="site-container split-panel">
+        <div className="site-container split-panel page-visual-split">
           <div>
             <p className="section-kicker dark">Voorbereiding</p>
             <h2>Een goed eerste gesprek vraagt weinig voorbereiding.</h2>
           </div>
-          <CheckList items={preparation} />
+          <div>
+            <CheckList items={preparation} />
+            <img
+              src={innerPageImages.dataMeeting}
+              alt="Kennismakingsgesprek over data en advies"
+            />
+          </div>
         </div>
       </section>
       <section className="page-section">

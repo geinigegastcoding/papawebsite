@@ -1,3 +1,4 @@
+import { innerPageImages } from "../inner-page-images";
 import { CheckList, PageShell } from "../site";
 
 const steps = [
@@ -45,6 +46,12 @@ const collaboration = [
   },
 ];
 
+const collaborationImages = [
+  innerPageImages.dataMeeting,
+  innerPageImages.deskNotes,
+  innerPageImages.planningOffice,
+];
+
 export default function WerkwijzePage() {
   return (
     <PageShell
@@ -66,18 +73,21 @@ export default function WerkwijzePage() {
         </div>
       </section>
       <section className="page-section page-section-light">
-        <div className="site-container split-panel">
+        <div className="site-container split-panel page-visual-split">
           <div>
             <p className="section-kicker dark">Uitgangspunt</p>
             <h2>Pragmatisch per klantvraag.</h2>
           </div>
-          <CheckList
-            items={[
-              "Aansluiten op bestaande systemen en definities",
-              "Complexe analyse begrijpelijk maken voor besluitvormers",
-              "Resultaat afstemmen op de specifieke situatie van de klant",
-            ]}
-          />
+          <div>
+            <CheckList
+              items={[
+                "Aansluiten op bestaande systemen en definities",
+                "Complexe analyse begrijpelijk maken voor besluitvormers",
+                "Resultaat afstemmen op de specifieke situatie van de klant",
+              ]}
+            />
+            <img src={innerPageImages.planningOffice} alt="Planning en analyse op een werktafel" />
+          </div>
         </div>
       </section>
       <section className="page-section">
@@ -100,8 +110,9 @@ export default function WerkwijzePage() {
             </p>
           </div>
           <div className="mini-case-grid">
-            {collaboration.map((item) => (
-              <article key={item.title} className="mini-case">
+            {collaboration.map((item, index) => (
+              <article key={item.title} className="mini-case mini-case-image">
+                <img src={collaborationImages[index]} alt="Samenwerking rond data-analyse" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>
