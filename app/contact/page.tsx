@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
+
 import { innerPageImages } from "../inner-page-images";
-import { ArrowIcon, CheckList, PageShell } from "../site";
+import { createPageMetadata } from "../metadata";
+import { ArrowIcon, CheckList, PageShell, SiteImage } from "../site";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Contact met Gerhard Magis | Magis Data Intelligence",
+  description:
+    "Plan een vrijblijvend inhoudelijk gesprek over data-analyse, managementinformatie, dashboards of een complex besluitvormingsvraagstuk.",
+  path: "/contact",
+  image: "/images/magis-work-session.webp",
+  socialTitle: "Contact met Gerhard Magis",
+  socialDescription: "Begin met de vraag die beter moet worden onderbouwd.",
+});
 
 const preparation = [
   "Welke beslissing of rapportage nu onvoldoende onderbouwd is",
@@ -54,8 +67,8 @@ export default function ContactPage() {
               Bespreek kort welke informatie, dashboards of analyses nodig zijn om betere keuzes te
               maken.
             </p>
-            <a className="button button-primary" href="mailto:info@magis-data-intelligence.nl">
-              Neem contact op
+            <a className="button button-primary" href="mailto:jgmagis@hotmail.com">
+              Mail Gerhard
               <ArrowIcon />
             </a>
           </aside>
@@ -69,7 +82,7 @@ export default function ContactPage() {
           </div>
           <div>
             <CheckList items={preparation} />
-            <img
+            <SiteImage
               src={innerPageImages.dataMeeting}
               alt="Kennismakingsgesprek over data en advies"
             />

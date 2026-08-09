@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && opennextjs-cloudflare build --skipNextBuild",
+    "test": "node --test tests/*.test.mjs",
+    "test:seo": "node tests/seo-crawl.mjs",
     "lint": "tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",

@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
+
 import { innerPageImages } from "../inner-page-images";
-import { CheckList, PageShell } from "../site";
+import { createPageMetadata } from "../metadata";
+import { CheckList, PageShell, SiteImage } from "../site";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Werkwijze | Magis Data Intelligence",
+  description:
+    "Een transparante werkwijze van beslisvraag en datakwaliteit naar analyse, richting en toepassing in de organisatie.",
+  path: "/werkwijze",
+  image: "/images/magis-work-session.webp",
+  socialDescription: "Eerst de vraag scherp. Dan analyse. Dan richting die in de praktijk werkt.",
+});
 
 const steps = [
   {
@@ -86,7 +98,7 @@ export default function WerkwijzePage() {
                 "Resultaat afstemmen op de specifieke situatie van de klant",
               ]}
             />
-            <img src={innerPageImages.planningOffice} alt="Planning en analyse op een werktafel" />
+            <SiteImage src={innerPageImages.planningOffice} alt="Planning en analyse op een werktafel" />
           </div>
         </div>
       </section>
@@ -112,7 +124,7 @@ export default function WerkwijzePage() {
           <div className="mini-case-grid">
             {collaboration.map((item, index) => (
               <article key={item.title} className="mini-case mini-case-image">
-                <img src={collaborationImages[index]} alt="Samenwerking rond data-analyse" />
+                <SiteImage src={collaborationImages[index]} alt="Samenwerking rond data-analyse" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>
