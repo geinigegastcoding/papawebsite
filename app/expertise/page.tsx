@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
+
 import { innerPageImages } from "../inner-page-images";
-import { CheckList, InfoCard, PageShell, expertise } from "../site";
+import { createPageMetadata } from "../metadata";
+import { CheckList, InfoCard, PageShell, SiteImage, expertise } from "../site";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Expertise | Magis Data Intelligence",
+  description:
+    "Expertise in data-analyse, statistiek, business intelligence, beleidsanalyse, risico's en managementinformatie.",
+  path: "/expertise",
+  image: "/images/magis-analysis-closeup.webp",
+  socialTitle: "Expertise in data en besluitvorming",
+  socialDescription: "Technische analyse verbonden met businesscontext en bestuurlijke keuzes.",
+});
 
 const applications = [
   "Stuurinformatie voor managementteams en directies",
@@ -58,7 +71,7 @@ export default function ExpertisePage() {
               Ervaring ligt vooral in situaties waar cijfers niet op zichzelf staan, maar verbonden
               zijn met beleid, risico's, prestaties en bestuurlijke keuzes.
             </p>
-            <img
+            <SiteImage
               src={innerPageImages.monitoringScreen}
               alt="Analyse op een scherm met datavisualisaties"
             />
@@ -87,7 +100,7 @@ export default function ExpertisePage() {
           <div className="mini-case-grid">
             {methodNotes.map((item, index) => (
               <article key={item.title} className="mini-case mini-case-image">
-                <img src={methodImages[index]} alt="Data-expertise toegepast in overleg" />
+                <SiteImage src={methodImages[index]} alt="Data-expertise toegepast in overleg" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>

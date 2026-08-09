@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
+
 import { innerPageImages } from "../inner-page-images";
-import { CheckList, InfoCard, PageShell } from "../site";
+import { createPageMetadata } from "../metadata";
+import { CheckList, InfoCard, PageShell, SiteImage } from "../site";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Cases: van cijfers naar keuzes | Magis Data Intelligence",
+  description:
+    "Typische data- en managementvraagstukken: van losse rapportage naar stuurinformatie, verklaring en beter onderbouwde keuzes.",
+  path: "/cases",
+  image: "/images/magis-analysis-closeup.webp",
+  socialTitle: "Cases: van cijfers naar keuzes",
+  socialDescription: "Voorbeelden van vragen waarbij analyse helpt om van observatie naar verklaring te komen.",
+});
 
 const cases = [
   {
@@ -77,7 +90,7 @@ export default function CasesPage() {
               Cases tonen vooral hoe vraagstukken worden aangepakt, welke inzichten ontstaan en hoe
               deze bijdragen aan beter onderbouwde keuzes.
             </p>
-            <img src={innerPageImages.dataMeeting} alt="Team bespreekt data-inzichten aan tafel" />
+            <SiteImage src={innerPageImages.dataMeeting} alt="Team bespreekt data-inzichten aan tafel" />
           </div>
         </div>
       </section>
@@ -94,7 +107,7 @@ export default function CasesPage() {
           <div className="mini-case-grid">
             {miniCaseExplanations.map((item, index) => (
               <article key={item.title} className="mini-case mini-case-image">
-                <img src={miniCaseImages[index]} alt="Voorbeeld van data-inzicht in de praktijk" />
+                <SiteImage src={miniCaseImages[index]} alt="Voorbeeld van data-inzicht in de praktijk" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>

@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
+
 import { innerPageImages } from "../inner-page-images";
-import { CheckList, PageShell, credentials } from "../site";
+import { createPageMetadata } from "../metadata";
+import { CheckList, PageShell, SiteImage, credentials } from "../site";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Gerhard Magis, PhD | Magis Data Intelligence",
+  description:
+    "Maak kennis met Gerhard Magis: senior business consultant en data-analist met een PhD in natuurkunde en brede consultancyervaring.",
+  path: "/over-mij",
+  image: "/images/magis-signal-hero.webp",
+  socialDescription: "Analytische diepgang, onafhankelijke blik en heldere vertaling naar management.",
+});
 
 const profileFocus = [
   {
@@ -39,7 +51,7 @@ export default function OverMijPage() {
       <section className="page-section">
         <div className="site-container profile-grid">
           <div className="profile-photo">
-            <img src="/images/gerhard-portrait.webp" alt="Portret van Gerhard Magis" />
+            <SiteImage src="/images/gerhard-portrait.webp" alt="Portret van Gerhard Magis" />
           </div>
           <div className="profile-copy">
             <p className="section-kicker dark">Brug tussen data en strategie</p>
@@ -68,7 +80,7 @@ export default function OverMijPage() {
                 "Werkzaam als zelfstandig consultant",
               ]}
             />
-            <img src="/images/gerhard-dashboard.webp" alt="Gerhard Magis bij datawerk" />
+            <SiteImage src="/images/gerhard-dashboard.webp" alt="Gerhard Magis bij datawerk" />
           </div>
         </div>
       </section>
@@ -85,7 +97,7 @@ export default function OverMijPage() {
           <div className="mini-case-grid">
             {profileFocus.map((item, index) => (
               <article key={item.title} className="mini-case mini-case-image">
-                <img src={profileImages[index]} alt="Profiel en werkomgeving" />
+                <SiteImage src={profileImages[index]} alt="Profiel en werkomgeving" />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>

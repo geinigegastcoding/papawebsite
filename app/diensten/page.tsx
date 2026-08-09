@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
+
 import { innerPageImages } from "../inner-page-images";
-import { CheckList, InfoCard, PageShell } from "../site";
+import { createPageMetadata } from "../metadata";
+import { CheckList, InfoCard, PageShell, SiteImage } from "../site";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Data-analyse & advies | Magis Data Intelligence",
+  description:
+    "Data-analyse, managementinformatie, risicoanalyse en strategisch advies voor organisaties die beter onderbouwde keuzes willen maken.",
+  path: "/diensten",
+  image: "/images/magis-analysis-closeup.webp",
+  socialTitle: "Data-analyse en advies | Magis Data Intelligence",
+  socialDescription: "Van complexe data naar bruikbare inzichten, stuurinformatie en concrete keuzes.",
+});
 
 const serviceBlocks = [
   {
@@ -24,7 +37,7 @@ const serviceBlocks = [
   },
   {
     title: "Procesoptimalisatie",
-    text: "Verbeteren van besluitvorming en efficientie door procesdata, prestatie-indicatoren en praktijkkennis bij elkaar te brengen.",
+    text: "Verbeteren van besluitvorming en efficiëntie door procesdata, prestatie-indicatoren en praktijkkennis bij elkaar te brengen.",
     icon: "target",
   },
 ];
@@ -76,7 +89,7 @@ export default function DienstenPage() {
               voor management, precies genoeg voor inhoudelijke teams en concreet genoeg om op te
               handelen.
             </p>
-            <img src={innerPageImages.dashboardScreen} alt="Dashboardoverzicht op een werkplek" />
+            <SiteImage src={innerPageImages.dashboardScreen} alt="Dashboardoverzicht op een werkplek" />
           </div>
         </div>
       </section>
@@ -102,7 +115,7 @@ export default function DienstenPage() {
           <div className="mini-case-grid">
             {engagementTypes.map((item, index) => (
               <article key={item} className="mini-case mini-case-image">
-                <img src={engagementImages[index]} alt="Zakelijke data-analyse in de praktijk" />
+                <SiteImage src={engagementImages[index]} alt="Zakelijke data-analyse in de praktijk" />
                 <h3>{item}</h3>
                 <p>
                   Afbakening, planning en resultaat worden vooraf concreet gemaakt, zodat duidelijk
