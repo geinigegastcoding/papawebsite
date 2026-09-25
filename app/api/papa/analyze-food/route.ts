@@ -1,10 +1,12 @@
 import { hasPapaSession } from '@/lib/papa-auth';
-import { buildFoodAnalysisPrompt, FOOD_ANALYSIS_RESPONSE_FORMAT, parseFoodAnalysis } from '@/lib/papa-ai';
+import { buildFoodAnalysisPrompt, FOOD_ANALYSIS_RESPONSE_FORMAT, getFoodAnalysisModels, parseFoodAnalysis } from '@/lib/papa-ai';
 
 export const dynamic = 'force-dynamic';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const OPENROUTER_KEY_NAMES = ['OPENROUTER_API_KEY', 'OPENROUTER_API_KEY_2', 'OPENROUTER_API_KEY_3'] as const;
+const RETRYABLE_UPSTREAM_STATUSES = new Set([401, 403, 408, 425, 429, 500, 502, 503, 504]);
 
 function jsonResponse(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -19,12 +21,22 @@ function toBase64(buffer: ArrayBuffer): string {
 
 function modelText(content: unknown): string {
   if (typeof content === 'string') return content;
+  if (content && typeof content === 'object' && !Array.isArray(content)) {
+    const objectContent = content as { parsed?: unknown; json?: unknown };
+    const parsed = objectContent.parsed ?? objectContent.json ?? content;
+    if (parsed && typeof parsed === 'object') return JSON.stringify(parsed);
+  }
   if (!Array.isArray(content)) return '';
   return content.filter((part): part is { type: 'text'; text: string } => Boolean(part && typeof part === 'object' && (part as { type?: unknown }).type === 'text' && typeof (part as { text?: unknown }).text === 'string')).map((part) => part.text).join('\n');
 }
 
 function extractJson(text: string): unknown {
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // Some providers add a short sentence before or after the JSON object.
+  }
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
   if (start < 0 || end <= start) return null;
@@ -37,8 +49,6 @@ function extractJson(text: string): unknown {
 
 export async function POST(request: Request) {
   if (!(await hasPapaSession())) return jsonResponse({ message: 'Niet ingelogd.' }, 401);
-  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
-  if (!apiKey) return jsonResponse({ message: 'De foto-analyse is nog niet geconfigureerd.' }, 503);
 
   let formData: FormData;
   try {
@@ -54,40 +64,84 @@ export async function POST(request: Request) {
 
   const description = typeof formData.get('description') === 'string' ? String(formData.get('description')).trim().slice(0, 500) : '';
   const diet = typeof formData.get('diet') === 'string' ? String(formData.get('diet')).trim().slice(0, 500) : '';
-  const model = process.env.OPENROUTER_MODEL?.trim() || 'qwen/qwen3.8-27b:free';
+  const models = getFoodAnalysisModels(process.env.OPENROUTER_MODEL, process.env.OPENROUTER_MODELS);
+  const apiKeys = OPENROUTER_KEY_NAMES.map((name) => process.env[name]?.trim()).filter((key): key is string => Boolean(key));
+  if (apiKeys.length === 0) return jsonResponse({ message: 'De foto-analyse is nog niet geconfigureerd.' }, 503);
   const image = `data:${file.type};base64,${toBase64(await file.arrayBuffer())}`;
 
-  const upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://magisintel.nl',
-      'X-Title': 'Papa voedingshulp'
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.1,
-      max_tokens: 1800,
-      provider: { require_parameters: true },
-      response_format: FOOD_ANALYSIS_RESPONSE_FORMAT,
-      messages: [
-        { role: 'system', content: buildFoodAnalysisPrompt(description, diet) },
-        { role: 'user', content: [{ type: 'text', text: 'Analyse this food photo and return the required JSON only.' }, { type: 'image_url', image_url: { url: image } }] }
-      ]
-    })
-  });
+  const baseRequestBody = {
+    temperature: 0.1,
+    max_tokens: 1800,
+    provider: { require_parameters: true, allow_fallbacks: true },
+    response_format: FOOD_ANALYSIS_RESPONSE_FORMAT,
+    messages: [
+      { role: 'system', content: buildFoodAnalysisPrompt(description, diet) },
+      { role: 'user', content: [{ type: 'text', text: 'Analyse this food photo and return the required JSON only.' }, { type: 'image_url', image_url: { url: image } }] }
+    ]
+  };
 
-  if (!upstream.ok) {
-    const detail = await upstream.text().catch(() => '');
-    console.error('OpenRouter food analysis failed', upstream.status, detail.slice(0, 300));
-    return jsonResponse({ message: upstream.status === 429 ? 'De gratis AI is even druk. Probeer het zo opnieuw.' : 'De foto-analyse kon niet worden uitgevoerd.' }, 502);
+  const requestBodies = models.map((model, index) => ({
+    ...baseRequestBody,
+    model,
+    ...(index === 0 ? { models: models.slice(1) } : {})
+  }));
+  let result: ReturnType<typeof parseFoodAnalysis> = null;
+  let selectedModel = models[0];
+  let lastStatus = 502;
+  let sawRateLimit = false;
+  let receivedUsableHttpResponse = false;
+
+  for (let modelIndex = 0; modelIndex < requestBodies.length && !result; modelIndex += 1) {
+    const requestBody = requestBodies[modelIndex];
+    for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex += 1) {
+      try {
+        const candidate = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKeys[keyIndex]}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://magisintel.nl',
+            'X-Title': 'Papa voedingshulp'
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!candidate.ok) {
+          lastStatus = candidate.status;
+          sawRateLimit = sawRateLimit || candidate.status === 429;
+          const detail = await candidate.text().catch(() => '');
+          console.error('OpenRouter food analysis failed', { model: requestBody.model, keySlot: keyIndex + 1, status: candidate.status, detail: detail.slice(0, 300) });
+          if (!RETRYABLE_UPSTREAM_STATUSES.has(candidate.status)) break;
+          continue;
+        }
+
+        receivedUsableHttpResponse = true;
+        const payload = await candidate.json().catch(() => null) as { model?: unknown; choices?: Array<{ message?: { content?: unknown; parsed?: unknown } }> } | null;
+        const message = payload?.choices?.[0]?.message;
+        const rawText = modelText(message?.content);
+        const parsedResult = parseFoodAnalysis(message?.parsed ?? extractJson(rawText));
+        if (parsedResult) {
+          result = parsedResult;
+          selectedModel = typeof payload?.model === 'string' ? payload.model : requestBody.model;
+          break;
+        }
+
+        console.error('OpenRouter food analysis returned no usable estimate; trying next model', { model: payload?.model || requestBody.model, contentLength: rawText.length });
+        break;
+      } catch (error) {
+        lastStatus = 503;
+        console.error('OpenRouter food analysis request failed', { model: requestBody.model, keySlot: keyIndex + 1, error: error instanceof Error ? error.message : 'unknown error' });
+      }
+    }
   }
 
-  const payload = await upstream.json().catch(() => null) as { choices?: Array<{ message?: { content?: unknown } }> } | null;
-  const rawText = modelText(payload?.choices?.[0]?.message?.content);
-  const result = parseFoodAnalysis(extractJson(rawText));
-  if (!result) return jsonResponse({ message: 'De AI gaf geen bruikbare voedingsschatting terug. Probeer een duidelijkere foto.' }, 502);
+  if (!result && !receivedUsableHttpResponse) {
+    return jsonResponse({ message: sawRateLimit || lastStatus === 429 ? 'De gratis AI is even druk. Probeer het zo opnieuw.' : 'De foto-analyse kon niet worden uitgevoerd.' }, 502);
+  }
+  if (!result) {
+    console.error('OpenRouter food analysis returned no usable estimate after model fallbacks', { modelCount: models.length });
+    return jsonResponse({ message: 'De AI-providers gaven geen bruikbare schatting terug. Probeer het opnieuw; de foto zelf lijkt bruikbaar.' }, 502);
+  }
   const safeResult = diet ? result : { ...result, dietFit: 'uncertain' as const, dietReason: 'Geen expliciete dieetregels opgegeven; daarom is de dieetcheck onzeker.' };
-  return jsonResponse({ result: safeResult, model });
+  return jsonResponse({ result: safeResult, model: selectedModel });
 }

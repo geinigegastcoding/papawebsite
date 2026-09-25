@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = process.cwd();
 const read = (file) => readFileSync(join(root, file), 'utf8');
 
-const { buildFoodAnalysisPrompt, FOOD_ANALYSIS_RESPONSE_FORMAT, parseFoodAnalysis } = await import('../lib/papa-ai.ts');
+const { buildFoodAnalysisPrompt, DEFAULT_FOOD_ANALYSIS_MODELS, FOOD_ANALYSIS_RESPONSE_FORMAT, getFoodAnalysisModels, parseFoodAnalysis } = await import('../lib/papa-ai.ts');
 
 test('photo prompt calibrates portions and refuses false precision', () => {
   const prompt = buildFoodAnalysisPrompt('2 boterhammen met kaas', 'eiwitrijk');
@@ -40,6 +40,17 @@ test('AI response parser accepts a complete estimate and rejects unsafe incomple
   assert.equal(parseFoodAnalysis({ ...valid, foods: [] }), null);
 });
 
+test('photo analysis has a bounded free-model fallback chain', () => {
+  assert.equal(DEFAULT_FOOD_ANALYSIS_MODELS.length, 4);
+  assert.equal(DEFAULT_FOOD_ANALYSIS_MODELS.at(-1), 'openrouter/free');
+  assert.deepEqual(getFoodAnalysisModels('custom/primary:free', 'backup/one:free,backup/one:free,backup/two:free,backup/three:free'), [
+    'custom/primary:free',
+    'backup/one:free',
+    'backup/two:free',
+    'backup/three:free'
+  ]);
+});
+
 test('portal keeps secrets server-side and protects its food routes', () => {
   const login = read('app/api/papa/login/route.ts');
   const analyze = read('app/api/papa/analyze-food/route.ts');
@@ -50,6 +61,9 @@ test('portal keeps secrets server-side and protects its food routes', () => {
   assert.doesNotMatch(analyze, /NEXT_PUBLIC_OPENROUTER/);
   assert.match(analyze, /hasPapaSession/);
   assert.match(analyze, /response_format:\s*FOOD_ANALYSIS_RESPONSE_FORMAT/);
+  assert.match(analyze, /OPENROUTER_API_KEY_2/);
+  assert.match(analyze, /OPENROUTER_API_KEY_3/);
+  assert.match(analyze, /trying next model/);
   assert.match(ai, /dietFit: \{ type: 'string', enum: \['yes', 'no', 'uncertain'\] \}/);
   assert.match(barcode, /world\.openfoodfacts\.org\/api\/v3\/product/);
   assert.match(barcode, /User-Agent/);

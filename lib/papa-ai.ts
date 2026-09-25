@@ -57,6 +57,22 @@ Return ONLY valid JSON with exactly these keys:
 
 All numeric values must be finite and non-negative. Keep rationale and assumptions short and concrete. Set needsReview to true when the photo hides meaningful ingredients, the calorie range is wide, or confidence is low.`;
 
+// OpenRouter supports at most three fallback entries in its `models` array.
+// Keep the list to free multimodal models that currently support structured output.
+export const DEFAULT_FOOD_ANALYSIS_MODELS = [
+  'qwen/qwen3.8-27b:free',
+  'google/gemma-4-31b-it:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'openrouter/free'
+] as const;
+
+export function getFoodAnalysisModels(primaryModel?: string, configuredModels?: string): string[] {
+  const configured = [primaryModel || '', ...(configuredModels || '').split(',')]
+    .map((model) => model.trim())
+    .filter(Boolean);
+  return [...new Set([...configured, ...DEFAULT_FOOD_ANALYSIS_MODELS])].slice(0, DEFAULT_FOOD_ANALYSIS_MODELS.length);
+}
+
 export const FOOD_ANALYSIS_RESPONSE_FORMAT = {
   type: 'json_schema',
   json_schema: {
