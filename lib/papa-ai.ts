@@ -66,40 +66,38 @@ export const FOOD_ANALYSIS_RESPONSE_FORMAT = {
       type: 'object',
       additionalProperties: false,
       properties: {
-        estimatedCalories: { type: 'number', minimum: 0, maximum: 10000 },
+        estimatedCalories: { type: 'number' },
         calorieRange: {
           type: 'object',
           additionalProperties: false,
           properties: {
-            low: { type: 'number', minimum: 0, maximum: 10000 },
-            high: { type: 'number', minimum: 0, maximum: 10000 }
+            low: { type: 'number' },
+            high: { type: 'number' }
           },
           required: ['low', 'high']
         },
-        proteinGrams: { type: 'number', minimum: 0, maximum: 1000 },
-        carbGrams: { type: 'number', minimum: 0, maximum: 1000 },
-        fatGrams: { type: 'number', minimum: 0, maximum: 1000 },
-        fiberGrams: { type: 'number', minimum: 0, maximum: 1000 },
+        proteinGrams: { type: 'number' },
+        carbGrams: { type: 'number' },
+        fatGrams: { type: 'number' },
+        fiberGrams: { type: 'number' },
         foods: {
           type: 'array',
-          minItems: 1,
-          maxItems: 20,
           items: {
             type: 'object',
             additionalProperties: false,
             properties: {
-              name: { type: 'string', minLength: 1, maxLength: 120 },
-              grams: { type: 'number', minimum: 0, maximum: 5000 },
-              calories: { type: 'number', minimum: 0, maximum: 10000 },
-              rationale: { type: 'string', minLength: 1, maxLength: 240 }
+              name: { type: 'string' },
+              grams: { type: 'number' },
+              calories: { type: 'number' },
+              rationale: { type: 'string' }
             },
             required: ['name', 'grams', 'calories', 'rationale']
           }
         },
         confidence: { type: 'string', enum: ['low', 'medium', 'high'] },
-        assumptions: { type: 'array', maxItems: 12, items: { type: 'string', maxLength: 240 } },
+        assumptions: { type: 'array', items: { type: 'string' } },
         dietFit: { type: 'string', enum: ['yes', 'no', 'uncertain'] },
-        dietReason: { type: 'string', minLength: 1, maxLength: 500 },
+        dietReason: { type: 'string' },
         needsReview: { type: 'boolean' }
       },
       required: ['estimatedCalories', 'calorieRange', 'proteinGrams', 'carbGrams', 'fatGrams', 'fiberGrams', 'foods', 'confidence', 'assumptions', 'dietFit', 'dietReason', 'needsReview']
