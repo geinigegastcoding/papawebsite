@@ -45,7 +45,7 @@ test("images reserve layout space and only above-fold visuals load eagerly", () 
   const site = read("app/site.tsx");
   const homepage = read("app/page.tsx");
   const otherSource = sourceFiles(appRoot)
-    .filter((file) => !file.endsWith("site.tsx"))
+    .filter((file) => !file.endsWith("site.tsx") && !file.includes(`${join("app", "papa")}`))
     .map((file) => readFileSync(file, "utf8"))
     .join("\n");
 

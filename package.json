@@ -17,6 +17,7 @@
     "@fontsource/manrope": "^5.0.19",
     "@fontsource/space-grotesk": "^5.0.18",
     "@opennextjs/cloudflare": "^1.19.4",
+    "@zxing/browser": "^0.1.5",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

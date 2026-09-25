@@ -126,6 +126,33 @@ export default function PrivacyPage() {
         </div>
       </section>
 
+      <section className="page-section page-section-light">
+        <div className="site-container split-panel">
+          <div>
+            <p className="section-kicker dark">Persoonlijke apps</p>
+            <h2>Een afgeschermde omgeving voor Luna en Fitness.</h2>
+          </div>
+          <div>
+            <p>
+              De portal op <a className="text-link" href="https://magisintel.nl/papa">magisintel.nl/papa</a> is
+              alleen bedoeld voor Gerhard Magis en wordt beschermd met een apart wachtwoord. Luna- en
+              Fitnesstrainingsdata worden in de browser op het gebruikte apparaat bewaard; de app heeft geen
+              accountdatabase of advertentieprofiel.
+            </p>
+            <p>
+              Een foto wordt alleen doorgestuurd wanneer u op fotoanalyse drukt. Voor die ene analyse wordt de
+              foto naar de ingestelde OpenRouter-AI-provider gestuurd en niet door deze app opgeslagen. Een barcode
+              wordt via Open Food Facts opgezocht. Deze externe diensten verwerken verzoeken volgens hun eigen
+              voorwaarden; gebruik fotoanalyse daarom alleen met foto&apos;s die u daarvoor wilt delen.
+            </p>
+            <p>
+              AI-calorieën, dieetchecks en trainingssuggesties zijn informatieve schattingen en geen medisch advies,
+              diagnose of vervanging van een arts of diëtist.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="page-section">
         <div className="site-container split-panel">
           <div>
