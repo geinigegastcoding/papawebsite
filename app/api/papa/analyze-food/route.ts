@@ -1,5 +1,5 @@
 import { hasPapaSession } from '@/lib/papa-auth';
-import { buildFoodAnalysisPrompt, parseFoodAnalysis } from '@/lib/papa-ai';
+import { buildFoodAnalysisPrompt, FOOD_ANALYSIS_RESPONSE_FORMAT, parseFoodAnalysis } from '@/lib/papa-ai';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +69,8 @@ export async function POST(request: Request) {
       model,
       temperature: 0.1,
       max_tokens: 1800,
+      provider: { require_parameters: true },
+      response_format: FOOD_ANALYSIS_RESPONSE_FORMAT,
       messages: [
         { role: 'system', content: buildFoodAnalysisPrompt(description, diet) },
         { role: 'user', content: [{ type: 'text', text: 'Analyse this food photo and return the required JSON only.' }, { type: 'image_url', image_url: { url: image } }] }
@@ -86,5 +88,6 @@ export async function POST(request: Request) {
   const rawText = modelText(payload?.choices?.[0]?.message?.content);
   const result = parseFoodAnalysis(extractJson(rawText));
   if (!result) return jsonResponse({ message: 'De AI gaf geen bruikbare voedingsschatting terug. Probeer een duidelijkere foto.' }, 502);
-  return jsonResponse({ result, model });
+  const safeResult = diet ? result : { ...result, dietFit: 'uncertain' as const, dietReason: 'Geen expliciete dieetregels opgegeven; daarom is de dieetcheck onzeker.' };
+  return jsonResponse({ result: safeResult, model });
 }

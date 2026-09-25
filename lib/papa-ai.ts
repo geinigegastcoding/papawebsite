@@ -29,7 +29,7 @@ Your job is to estimate the edible food and drink shown in a photo. The answer i
 Follow this method:
 1. List every visible component separately, including visible oil, sauce, dressing, toppings and drinks. If an ingredient is hidden, say so in assumptions instead of inventing a brand.
 2. Infer edible grams or millilitres from the description, plate/cutlery/packaging scale, and normal portions. If the portion cannot be seen reliably, use a wider range and lower confidence.
-3. Estimate each component with a standard reference value, then add the components. Calculate calories from the components and macros; do not make the result look precise just because the photo is sharp.
+3. Estimate each component with a standard reference value, then add the components. Use the component sum as the primary kcal estimate and use 4 kcal/g protein, 4 kcal/g carbohydrate, and 9 kcal/g fat as a sanity check. If the two checks conflict, widen the range and lower confidence instead of hiding the conflict.
 4. Return a central calorie estimate rounded to the nearest 10 kcal and a plausible low/high range rounded to the nearest 10 kcal. The range must contain the central estimate.
 5. If a package label or barcode is clearly readable, use printed nutrition only when it is legible. Do not hallucinate a product, recipe, restaurant or serving size.
 6. Evaluate dietFit only against the explicit diet rules supplied by the user. Use uncertain when the rules are missing, ambiguous, or depend on an ingredient that cannot be identified. Never make a medical safety claim.
@@ -56,6 +56,56 @@ Return ONLY valid JSON with exactly these keys:
 }
 
 All numeric values must be finite and non-negative. Keep rationale and assumptions short and concrete. Set needsReview to true when the photo hides meaningful ingredients, the calorie range is wide, or confidence is low.`;
+
+export const FOOD_ANALYSIS_RESPONSE_FORMAT = {
+  type: 'json_schema',
+  json_schema: {
+    name: 'food_analysis',
+    strict: true,
+    schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        estimatedCalories: { type: 'number', minimum: 0, maximum: 10000 },
+        calorieRange: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            low: { type: 'number', minimum: 0, maximum: 10000 },
+            high: { type: 'number', minimum: 0, maximum: 10000 }
+          },
+          required: ['low', 'high']
+        },
+        proteinGrams: { type: 'number', minimum: 0, maximum: 1000 },
+        carbGrams: { type: 'number', minimum: 0, maximum: 1000 },
+        fatGrams: { type: 'number', minimum: 0, maximum: 1000 },
+        fiberGrams: { type: 'number', minimum: 0, maximum: 1000 },
+        foods: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 20,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              name: { type: 'string', minLength: 1, maxLength: 120 },
+              grams: { type: 'number', minimum: 0, maximum: 5000 },
+              calories: { type: 'number', minimum: 0, maximum: 10000 },
+              rationale: { type: 'string', minLength: 1, maxLength: 240 }
+            },
+            required: ['name', 'grams', 'calories', 'rationale']
+          }
+        },
+        confidence: { type: 'string', enum: ['low', 'medium', 'high'] },
+        assumptions: { type: 'array', maxItems: 12, items: { type: 'string', maxLength: 240 } },
+        dietFit: { type: 'string', enum: ['yes', 'no', 'uncertain'] },
+        dietReason: { type: 'string', minLength: 1, maxLength: 500 },
+        needsReview: { type: 'boolean' }
+      },
+      required: ['estimatedCalories', 'calorieRange', 'proteinGrams', 'carbGrams', 'fatGrams', 'fiberGrams', 'foods', 'confidence', 'assumptions', 'dietFit', 'dietReason', 'needsReview']
+    }
+  }
+} as const;
 
 export function buildFoodAnalysisPrompt(description: string, diet: string): string {
   return `${FOOD_ANALYSIS_PROMPT}\n\nUser description: ${description || '(none provided)'}\nExplicit diet rules or goal: ${diet || '(none provided; return uncertain)'}`;
@@ -108,6 +158,6 @@ export function parseFoodAnalysis(value: unknown): FoodAnalysis | null {
     assumptions: shortStrings(raw.assumptions, 240),
     dietFit,
     dietReason,
-    needsReview: raw.needsReview === true
+    needsReview: raw.needsReview === true || confidence === 'low' || high! - low! > Math.max(100, estimatedCalories! * 0.5)
   };
 }

@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = process.cwd();
 const read = (file) => readFileSync(join(root, file), 'utf8');
 
-const { buildFoodAnalysisPrompt, parseFoodAnalysis } = await import('../lib/papa-ai.ts');
+const { buildFoodAnalysisPrompt, FOOD_ANALYSIS_RESPONSE_FORMAT, parseFoodAnalysis } = await import('../lib/papa-ai.ts');
 
 test('photo prompt calibrates portions and refuses false precision', () => {
   const prompt = buildFoodAnalysisPrompt('2 boterhammen met kaas', 'eiwitrijk');
@@ -14,6 +14,9 @@ test('photo prompt calibrates portions and refuses false precision', () => {
   assert.match(prompt, /250 g cooked potatoes/);
   assert.match(prompt, /Return ONLY valid JSON/);
   assert.match(prompt, /eiwitrijk/);
+  assert.equal(FOOD_ANALYSIS_RESPONSE_FORMAT.type, 'json_schema');
+  assert.equal(FOOD_ANALYSIS_RESPONSE_FORMAT.json_schema.strict, true);
+  assert.equal(FOOD_ANALYSIS_RESPONSE_FORMAT.json_schema.schema.additionalProperties, false);
 });
 
 test('AI response parser accepts a complete estimate and rejects unsafe incomplete data', () => {
@@ -40,11 +43,14 @@ test('AI response parser accepts a complete estimate and rejects unsafe incomple
 test('portal keeps secrets server-side and protects its food routes', () => {
   const login = read('app/api/papa/login/route.ts');
   const analyze = read('app/api/papa/analyze-food/route.ts');
+  const ai = read('lib/papa-ai.ts');
   const barcode = read('app/api/papa/barcode/[code]/route.ts');
   assert.match(login, /httpOnly:\s*true/);
   assert.match(login, /path:\s*['"]\/['"]/);
   assert.doesNotMatch(analyze, /NEXT_PUBLIC_OPENROUTER/);
   assert.match(analyze, /hasPapaSession/);
+  assert.match(analyze, /response_format:\s*FOOD_ANALYSIS_RESPONSE_FORMAT/);
+  assert.match(ai, /dietFit: \{ type: 'string', enum: \['yes', 'no', 'uncertain'\] \}/);
   assert.match(barcode, /world\.openfoodfacts\.org\/api\/v3\/product/);
   assert.match(barcode, /User-Agent/);
 });
