@@ -4,6 +4,12 @@
   "name": "papawebsite",
   "compatibility_date": "2026-04-28",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "routes": [
+    {
+      "pattern": "magisintel.nl/papa*",
+      "zone_name": "magisintel.nl"
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
