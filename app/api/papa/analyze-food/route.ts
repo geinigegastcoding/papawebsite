@@ -14,6 +14,12 @@ const OPENROUTER_KEY_NAMES = [
   'OPENROUTER_API_KEY_6'
 ] as const;
 const RETRYABLE_UPSTREAM_STATUSES = new Set([401, 403, 408, 425, 429, 500, 502, 503, 504]);
+const JSON_MODE_MODELS = new Set([
+  'openrouter/free',
+  'google/gemma-4-31b-it:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'dots-studio/dots-3-note-preview:free'
+]);
 
 function jsonResponse(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -84,18 +90,17 @@ export async function POST(request: Request) {
   const baseRequestBody = {
     temperature: 0.1,
     max_tokens: 3000,
-    provider: { allow_fallbacks: true, require_parameters: true },
-    response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: buildFoodAnalysisPrompt(description, diet) },
       { role: 'user', content: [{ type: 'text', text: 'Analyse this food photo and return the required JSON only.' }, { type: 'image_url', image_url: { url: image } }] }
     ]
   };
 
-  const requestBodies = models.map((model, index) => ({
+  const requestBodies = models.map((model) => ({
     ...baseRequestBody,
     model,
-    ...(index === 0 ? { models: models.slice(1) } : {})
+    provider: { allow_fallbacks: true, ...(JSON_MODE_MODELS.has(model) ? { require_parameters: true } : {}) },
+    ...(JSON_MODE_MODELS.has(model) ? { response_format: { type: 'json_object' } } : {})
   }));
   let result: ReturnType<typeof parseFoodAnalysis> = null;
   let selectedModel = models[0];
