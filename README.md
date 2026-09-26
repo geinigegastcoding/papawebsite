@@ -27,7 +27,7 @@ npx wrangler versions secret put PAPA_AUTH_SECRET
 npx wrangler versions secret put OPENROUTER_API_KEY
 ```
 
-OpenRouter free means that the selected model endpoint is priced at zero; you still need one OpenRouter account and API key, and free endpoints are rate-limited. The route uses OpenRouter's multimodal model chain first and then Cloudflare Workers AI's native `@cf/google/gemma-3-12b-it` vision model as a separate provider fallback. `OPENROUTER_MODEL` and the comma-separated `OPENROUTER_MODELS` override the OpenRouter order; extra OpenRouter keys are intentionally not supported because they do not create an independent account quota. Cloudflare Workers AI is enabled by the `AI` binding in `wrangler.jsonc`, so it needs no additional secret.
+OpenRouter free means that the selected model endpoint is priced at zero; you still need one OpenRouter account and API key, and free endpoints are rate-limited. The route tries current Cloudflare Workers AI vision models first (fast Moondream, Gemma 4, Qwen 3.8, and Mistral Small), then falls back to OpenRouter's bounded multimodal free-model chain. `OPENROUTER_MODEL` and the comma-separated `OPENROUTER_MODELS` override the OpenRouter order; extra OpenRouter keys are intentionally not supported because they do not create an independent account quota. Cloudflare Workers AI is enabled by the `AI` binding in `wrangler.jsonc`, so it needs no additional secret.
 
 The photo output is constrained in three layers:
 

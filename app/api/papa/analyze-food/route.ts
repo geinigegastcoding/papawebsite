@@ -9,7 +9,12 @@ const ANALYSIS_DEADLINE_MS = 30000;
 const PROVIDER_ATTEMPT_TIMEOUT_MS = 8000;
 const CLOUDFLARE_AI_ATTEMPT_TIMEOUT_MS = 9000;
 const CLOUDFLARE_AI_TOTAL_TIMEOUT_MS = 14000;
-const CLOUDFLARE_AI_MODELS = ['@cf/google/gemma-3-12b-it', '@cf/google/gemma-4-26b-a4b-it'] as const;
+const CLOUDFLARE_AI_MODELS = [
+  '@cf/moondream/moondream3.1-9B-A2B',
+  '@cf/google/gemma-4-26b-a4b-it',
+  '@cf/qwen/qwen3.8-27b',
+  '@cf/mistralai/mistral-small-3.1-24b-instruct'
+] as const;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const RETRYABLE_UPSTREAM_STATUSES = new Set([401, 403, 408, 425, 429, 500, 502, 503, 504]);
 const JSON_MODE_MODELS = new Set([
@@ -33,8 +38,8 @@ function toBase64(buffer: ArrayBuffer): string {
 function modelText(content: unknown): string {
   if (typeof content === 'string') return content;
   if (content && typeof content === 'object' && !Array.isArray(content)) {
-    const objectContent = content as { parsed?: unknown; json?: unknown; text?: unknown; content?: unknown; value?: unknown };
-    for (const candidate of [objectContent.text, objectContent.value, objectContent.content, objectContent.parsed, objectContent.json]) {
+    const objectContent = content as { parsed?: unknown; json?: unknown; text?: unknown; content?: unknown; value?: unknown; answer?: unknown; caption?: unknown };
+    for (const candidate of [objectContent.text, objectContent.value, objectContent.content, objectContent.parsed, objectContent.json, objectContent.answer, objectContent.caption]) {
       const text = modelText(candidate);
       if (text) return text;
     }
@@ -64,7 +69,7 @@ function extractJson(text: string): unknown {
 }
 
 type ParsedFoodAnalysis = NonNullable<ReturnType<typeof parseFoodAnalysis>>;
-type WorkersAiBinding = { run: (model: string, input: Record<string, unknown>) => Promise<unknown> };
+type WorkersAiBinding = { run: (model: string, input: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown> };
 
 function getWorkersAiBinding(env: unknown): WorkersAiBinding | null {
   if (!env || typeof env !== 'object') return null;
@@ -74,23 +79,48 @@ function getWorkersAiBinding(env: unknown): WorkersAiBinding | null {
 
 function workersAiText(payload: unknown): string {
   if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
-    const response = payload as { response?: unknown; result?: unknown };
-    return modelText(response.response ?? response.result ?? payload);
+    const response = payload as { response?: unknown; result?: unknown; answer?: unknown; caption?: unknown };
+    return modelText(response.response ?? response.result ?? response.answer ?? response.caption ?? payload);
   }
   return modelText(payload);
+}
+
+function workersAiInput(model: string, prompt: string, image: string): Record<string, unknown> {
+  if (model.startsWith('@cf/moondream/')) {
+    return { task: 'query', image, question: `${prompt}\n\nReturn ONLY the JSON object requested above.`, reasoning: false, temperature: 0.1, max_tokens: 1800, stream: false };
+  }
+  return {
+    messages: [
+      { role: 'system', content: prompt },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Analyse this food photo and return the required JSON only.' },
+          { type: 'image_url', image_url: { url: image } }
+        ]
+      }
+    ],
+    temperature: 0.1,
+    max_tokens: 1800
+  };
 }
 
 async function tryCloudflareFoodAnalysis(prompt: string, image: string, deadline: number): Promise<{ result: ParsedFoodAnalysis; model: string } | null> {
   let env: unknown;
   try {
     ({ env } = await getCloudflareContext({ async: true }));
-  } catch {
+  } catch (error) {
+    console.error('Cloudflare AI context unavailable', { error: error instanceof Error ? error.message : 'unknown error' });
     return null;
   }
 
   const ai = getWorkersAiBinding(env);
   const remainingMs = deadline - Date.now();
-  if (!ai || remainingMs <= 0) return null;
+  if (!ai) {
+    console.error('Cloudflare AI binding unavailable');
+    return null;
+  }
+  if (remainingMs <= 0) return null;
 
   const cloudflareDeadline = Math.min(deadline, Date.now() + CLOUDFLARE_AI_TOTAL_TIMEOUT_MS);
   for (const model of CLOUDFLARE_AI_MODELS) {
@@ -98,15 +128,7 @@ async function tryCloudflareFoodAnalysis(prompt: string, image: string, deadline
     if (modelRemainingMs <= 0) break;
     try {
       const payload = await Promise.race([
-        ai.run(model, {
-          messages: [
-            { role: 'system', content: prompt },
-            { role: 'user', content: 'Analyse this food photo and return the required JSON only.' }
-          ],
-          image,
-          temperature: 0.1,
-          max_tokens: 1800
-        }),
+        ai.run(model, workersAiInput(model, prompt, image), { rejectIfBusy: true }),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Cloudflare AI timeout')), Math.min(CLOUDFLARE_AI_ATTEMPT_TIMEOUT_MS, modelRemainingMs)))
       ]);
       const rawText = workersAiText(payload);

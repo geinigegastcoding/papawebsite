@@ -31,10 +31,11 @@ async function hmac(value: string, secret: string): Promise<Uint8Array> {
   return new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder().encode(value)));
 }
 
-function authConfig(): { password: string; secret: string } | null {
+function authConfig(): { password: string; secret: string; testPassword?: string } | null {
   const password = process.env.PAPA_APP_PASSWORD?.trim();
   const secret = process.env.PAPA_AUTH_SECRET?.trim();
-  return password && secret ? { password, secret } : null;
+  const testPassword = process.env.PAPA_TEST_PASSWORD?.trim();
+  return password && secret ? { password, secret, testPassword: testPassword && testPassword !== password ? testPassword : undefined } : null;
 }
 
 export function isPapaAuthConfigured(): boolean {
@@ -44,8 +45,12 @@ export function isPapaAuthConfigured(): boolean {
 export async function verifyPapaPassword(password: string): Promise<boolean> {
   const config = authConfig();
   if (!config || password.length === 0 || password.length > 200) return false;
-  const [actual, expected] = await Promise.all([hmac(password, config.secret), hmac(config.password, config.secret)]);
-  return constantTimeEqual(actual, expected);
+  const [actual, ...expected] = await Promise.all([
+    hmac(password, config.secret),
+    hmac(config.password, config.secret),
+    ...(config.testPassword ? [hmac(config.testPassword, config.secret)] : [])
+  ]);
+  return expected.reduce((matched, candidate) => constantTimeEqual(actual, candidate) || matched, false);
 }
 
 export async function createPapaSession(): Promise<string> {
