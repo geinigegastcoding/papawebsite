@@ -38,6 +38,23 @@ test('AI response parser accepts a complete estimate and rejects unsafe incomple
   assert.equal(valid?.dietFit, 'uncertain');
   assert.equal(parseFoodAnalysis({ ...valid, calorieRange: { low: 700, high: 800 } }), null);
   assert.equal(parseFoodAnalysis({ ...valid, foods: [] }), null);
+
+  const providerShapeVariant = parseFoodAnalysis({
+    ...valid,
+    estimatedCalories: '600',
+    calorieRange: { low: '520', high: '690' },
+    proteinGrams: '42',
+    carbGrams: '58',
+    fatGrams: '18',
+    fiberGrams: '9',
+    foods: [{ name: 'aardappelen', grams: '250', calories: '190', rationale: 'zichtbare portie op het bord' }],
+    confidence: undefined,
+    dietFit: undefined,
+    dietReason: undefined
+  });
+  assert.equal(providerShapeVariant?.confidence, 'low');
+  assert.equal(providerShapeVariant?.dietFit, 'uncertain');
+  assert.equal(providerShapeVariant?.needsReview, true);
 });
 
 test('photo analysis has a bounded free-model fallback chain', () => {

@@ -126,7 +126,12 @@ export function buildFoodAnalysisPrompt(description: string, diet: string): stri
 }
 
 function finiteNumber(value: unknown, maximum: number): number | null {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= maximum ? value : null;
+  const numberValue = typeof value === 'number'
+    ? value
+    : typeof value === 'string' && /^\d+(?:\.\d+)?$/.test(value.trim())
+      ? Number(value.trim())
+      : null;
+  return numberValue !== null && Number.isFinite(numberValue) && numberValue >= 0 && numberValue <= maximum ? numberValue : null;
 }
 
 function shortStrings(value: unknown, maximum: number): string[] {
@@ -144,10 +149,10 @@ export function parseFoodAnalysis(value: unknown): FoodAnalysis | null {
   const carbGrams = finiteNumber(raw.carbGrams, 1000);
   const fatGrams = finiteNumber(raw.fatGrams, 1000);
   const fiberGrams = finiteNumber(raw.fiberGrams, 1000);
-  const confidence = raw.confidence === 'low' || raw.confidence === 'medium' || raw.confidence === 'high' ? raw.confidence : null;
-  const dietFit = raw.dietFit === 'yes' || raw.dietFit === 'no' || raw.dietFit === 'uncertain' ? raw.dietFit : null;
-  const dietReason = typeof raw.dietReason === 'string' ? raw.dietReason.trim().slice(0, 500) : '';
-  if ([estimatedCalories, low, high, proteinGrams, carbGrams, fatGrams, fiberGrams].some((item) => item === null) || !confidence || !dietFit || !dietReason || low! > estimatedCalories! || estimatedCalories! > high!) return null;
+  const confidence = raw.confidence === 'low' || raw.confidence === 'medium' || raw.confidence === 'high' ? raw.confidence : 'low';
+  const dietFit = raw.dietFit === 'yes' || raw.dietFit === 'no' || raw.dietFit === 'uncertain' ? raw.dietFit : 'uncertain';
+  const dietReason = typeof raw.dietReason === 'string' && raw.dietReason.trim() ? raw.dietReason.trim().slice(0, 500) : 'Geen expliciete dieetregels opgegeven; daarom is de dieetcheck onzeker.';
+  if ([estimatedCalories, low, high, proteinGrams, carbGrams, fatGrams, fiberGrams].some((item) => item === null) || low! > estimatedCalories! || estimatedCalories! > high!) return null;
 
   const foods = Array.isArray(raw.foods) ? raw.foods.map((item) => {
     if (!item || typeof item !== 'object') return null;

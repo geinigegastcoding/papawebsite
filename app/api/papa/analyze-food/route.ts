@@ -27,13 +27,14 @@ function modelText(content: unknown): string {
     if (parsed && typeof parsed === 'object') return JSON.stringify(parsed);
   }
   if (!Array.isArray(content)) return '';
-  return content.filter((part): part is { type: 'text'; text: string } => Boolean(part && typeof part === 'object' && (part as { type?: unknown }).type === 'text' && typeof (part as { text?: unknown }).text === 'string')).map((part) => part.text).join('\n');
+  return content.filter((part): part is { text: string } => Boolean(part && typeof part === 'object' && typeof (part as { text?: unknown }).text === 'string')).map((part) => part.text).join('\n');
 }
 
 function extractJson(text: string): unknown {
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   try {
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    return typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
   } catch {
     // Some providers add a short sentence before or after the JSON object.
   }
@@ -41,7 +42,8 @@ function extractJson(text: string): unknown {
   const end = cleaned.lastIndexOf('}');
   if (start < 0 || end <= start) return null;
   try {
-    return JSON.parse(cleaned.slice(start, end + 1));
+    const parsed = JSON.parse(cleaned.slice(start, end + 1));
+    return typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
   } catch {
     return null;
   }
@@ -116,17 +118,25 @@ export async function POST(request: Request) {
         }
 
         receivedUsableHttpResponse = true;
-        const payload = await candidate.json().catch(() => null) as { model?: unknown; choices?: Array<{ message?: { content?: unknown; parsed?: unknown } }> } | null;
+        const payload = await candidate.json().catch(() => null) as { model?: unknown; choices?: Array<{ finish_reason?: unknown; message?: { content?: unknown; parsed?: unknown } }> } | null;
         const message = payload?.choices?.[0]?.message;
         const rawText = modelText(message?.content);
-        const parsedResult = parseFoodAnalysis(message?.parsed ?? extractJson(rawText));
+        const parsedPayload = typeof message?.parsed === 'string' ? extractJson(message.parsed) : message?.parsed;
+        const parsedResult = parseFoodAnalysis(parsedPayload ?? extractJson(rawText));
         if (parsedResult) {
           result = parsedResult;
           selectedModel = typeof payload?.model === 'string' ? payload.model : requestBody.model;
           break;
         }
 
-        console.error('OpenRouter food analysis returned no usable estimate; trying next model', { model: payload?.model || requestBody.model, contentLength: rawText.length });
+        console.error('OpenRouter food analysis returned no usable estimate; trying next model', {
+          model: payload?.model || requestBody.model,
+          finishReason: payload?.choices?.[0]?.finish_reason,
+          messageKeys: message && typeof message === 'object' ? Object.keys(message) : [],
+          contentType: typeof message?.content,
+          contentBlockCount: Array.isArray(message?.content) ? message.content.length : null,
+          contentLength: rawText.length
+        });
         break;
       } catch (error) {
         lastStatus = 503;
