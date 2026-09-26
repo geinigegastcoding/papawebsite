@@ -4,6 +4,8 @@ import { buildFoodAnalysisPrompt, getFoodAnalysisModels, parseFoodAnalysis } fro
 export const dynamic = 'force-dynamic';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const ANALYSIS_DEADLINE_MS = 26000;
+const PROVIDER_ATTEMPT_TIMEOUT_MS = 8000;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const OPENROUTER_KEY_NAMES = [
   'OPENROUTER_API_KEY',
@@ -107,10 +109,14 @@ export async function POST(request: Request) {
   let lastStatus = 502;
   let sawRateLimit = false;
   let receivedUsableHttpResponse = false;
+  const analysisDeadline = Date.now() + ANALYSIS_DEADLINE_MS;
 
   for (let modelIndex = 0; modelIndex < requestBodies.length && !result; modelIndex += 1) {
+    if (Date.now() >= analysisDeadline) break;
     const requestBody = requestBodies[modelIndex];
     for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex += 1) {
+      const remainingMs = analysisDeadline - Date.now();
+      if (remainingMs <= 0) break;
       try {
         const candidate = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -120,7 +126,8 @@ export async function POST(request: Request) {
             'HTTP-Referer': 'https://magisintel.nl',
             'X-Title': 'Papa voedingshulp'
           },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(Math.min(PROVIDER_ATTEMPT_TIMEOUT_MS, remainingMs))
         });
 
         if (!candidate.ok) {
