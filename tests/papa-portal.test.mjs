@@ -104,6 +104,7 @@ test('portal keeps secrets server-side and protects its food routes', () => {
   const analyze = read('app/api/papa/analyze-food/route.ts');
   const ai = read('lib/papa-ai.ts');
   const barcode = read('app/api/papa/barcode/[code]/route.ts');
+  const wrangler = read('wrangler.jsonc');
   assert.match(login, /httpOnly:\s*true/);
   assert.match(login, /path:\s*['"]\/['"]/);
   assert.doesNotMatch(analyze, /NEXT_PUBLIC_OPENROUTER/);
@@ -112,9 +113,10 @@ test('portal keeps secrets server-side and protects its food routes', () => {
   assert.match(analyze, /response_format:\s*\{ type: 'json_object' \}/);
   assert.match(analyze, /AbortSignal\.timeout/);
   assert.match(analyze, /ANALYSIS_DEADLINE_MS/);
-  assert.match(analyze, /OPENROUTER_API_KEY_2/);
-  assert.match(analyze, /OPENROUTER_API_KEY_3/);
-  assert.match(analyze, /OPENROUTER_API_KEY_6/);
+  assert.match(analyze, /getCloudflareContext/);
+  assert.match(analyze, /CLOUDFLARE_AI_MODELS/);
+  assert.doesNotMatch(analyze, /OPENROUTER_API_KEY_[2-6]/);
+  assert.match(wrangler, /"ai":\s*\{\s*"binding":\s*"AI"/);
   assert.match(analyze, /trying next model/);
   assert.match(ai, /dietFit: \{ type: 'string', enum: \['yes', 'no', 'uncertain'\] \}/);
   assert.match(barcode, /world\.openfoodfacts\.org\/api\/v3\/product/);

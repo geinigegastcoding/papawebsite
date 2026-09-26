@@ -1,20 +1,16 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { hasPapaSession } from '@/lib/papa-auth';
 import { buildFoodAnalysisPrompt, getFoodAnalysisModels, parseFoodAnalysis } from '@/lib/papa-ai';
 
 export const dynamic = 'force-dynamic';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const ANALYSIS_DEADLINE_MS = 26000;
+const ANALYSIS_DEADLINE_MS = 30000;
 const PROVIDER_ATTEMPT_TIMEOUT_MS = 8000;
+const CLOUDFLARE_AI_ATTEMPT_TIMEOUT_MS = 9000;
+const CLOUDFLARE_AI_TOTAL_TIMEOUT_MS = 14000;
+const CLOUDFLARE_AI_MODELS = ['@cf/google/gemma-3-12b-it', '@cf/google/gemma-4-26b-a4b-it'] as const;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-const OPENROUTER_KEY_NAMES = [
-  'OPENROUTER_API_KEY',
-  'OPENROUTER_API_KEY_2',
-  'OPENROUTER_API_KEY_3',
-  'OPENROUTER_API_KEY_4',
-  'OPENROUTER_API_KEY_5',
-  'OPENROUTER_API_KEY_6'
-] as const;
 const RETRYABLE_UPSTREAM_STATUSES = new Set([401, 403, 408, 425, 429, 500, 502, 503, 504]);
 const JSON_MODE_MODELS = new Set([
   'openrouter/free',
@@ -67,6 +63,63 @@ function extractJson(text: string): unknown {
   }
 }
 
+type ParsedFoodAnalysis = NonNullable<ReturnType<typeof parseFoodAnalysis>>;
+type WorkersAiBinding = { run: (model: string, input: Record<string, unknown>) => Promise<unknown> };
+
+function getWorkersAiBinding(env: unknown): WorkersAiBinding | null {
+  if (!env || typeof env !== 'object') return null;
+  const ai = (env as Record<string, unknown>).AI;
+  return ai && typeof ai === 'object' && typeof (ai as { run?: unknown }).run === 'function' ? ai as WorkersAiBinding : null;
+}
+
+function workersAiText(payload: unknown): string {
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    const response = payload as { response?: unknown; result?: unknown };
+    return modelText(response.response ?? response.result ?? payload);
+  }
+  return modelText(payload);
+}
+
+async function tryCloudflareFoodAnalysis(prompt: string, image: string, deadline: number): Promise<{ result: ParsedFoodAnalysis; model: string } | null> {
+  let env: unknown;
+  try {
+    ({ env } = await getCloudflareContext({ async: true }));
+  } catch {
+    return null;
+  }
+
+  const ai = getWorkersAiBinding(env);
+  const remainingMs = deadline - Date.now();
+  if (!ai || remainingMs <= 0) return null;
+
+  const cloudflareDeadline = Math.min(deadline, Date.now() + CLOUDFLARE_AI_TOTAL_TIMEOUT_MS);
+  for (const model of CLOUDFLARE_AI_MODELS) {
+    const modelRemainingMs = cloudflareDeadline - Date.now();
+    if (modelRemainingMs <= 0) break;
+    try {
+      const payload = await Promise.race([
+        ai.run(model, {
+          messages: [
+            { role: 'system', content: prompt },
+            { role: 'user', content: 'Analyse this food photo and return the required JSON only.' }
+          ],
+          image,
+          temperature: 0.1,
+          max_tokens: 1800
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Cloudflare AI timeout')), Math.min(CLOUDFLARE_AI_ATTEMPT_TIMEOUT_MS, modelRemainingMs)))
+      ]);
+      const rawText = workersAiText(payload);
+      const result = parseFoodAnalysis(extractJson(rawText) ?? payload);
+      if (result) return { result, model: `cloudflare:${model}` };
+      console.error('Cloudflare AI food analysis returned no usable estimate; trying next model', { model, contentLength: rawText.length });
+    } catch (error) {
+      console.error('Cloudflare AI food analysis request failed; trying next model', { model, error: error instanceof Error ? error.message : 'unknown error' });
+    }
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
   if (!(await hasPapaSession())) return jsonResponse({ message: 'Niet ingelogd.' }, 401);
 
@@ -85,8 +138,7 @@ export async function POST(request: Request) {
   const description = typeof formData.get('description') === 'string' ? String(formData.get('description')).trim().slice(0, 500) : '';
   const diet = typeof formData.get('diet') === 'string' ? String(formData.get('diet')).trim().slice(0, 500) : '';
   const models = getFoodAnalysisModels(process.env.OPENROUTER_MODEL, process.env.OPENROUTER_MODELS);
-  const apiKeys = OPENROUTER_KEY_NAMES.map((name) => process.env[name]?.trim()).filter((key): key is string => Boolean(key));
-  if (apiKeys.length === 0) return jsonResponse({ message: 'De foto-analyse is nog niet geconfigureerd.' }, 503);
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim();
   const image = `data:${file.type};base64,${toBase64(await file.arrayBuffer())}`;
 
   const baseRequestBody = {
@@ -111,17 +163,24 @@ export async function POST(request: Request) {
   let receivedUsableHttpResponse = false;
   const analysisDeadline = Date.now() + ANALYSIS_DEADLINE_MS;
 
-  for (let modelIndex = 0; modelIndex < requestBodies.length && !result; modelIndex += 1) {
-    if (Date.now() >= analysisDeadline) break;
-    const requestBody = requestBodies[modelIndex];
-    for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex += 1) {
+  const cloudflareResult = await tryCloudflareFoodAnalysis(buildFoodAnalysisPrompt(description, diet), image, analysisDeadline);
+  if (cloudflareResult) {
+    result = cloudflareResult.result;
+    selectedModel = cloudflareResult.model;
+    receivedUsableHttpResponse = true;
+  }
+
+  if (!result && openRouterApiKey) {
+    for (let modelIndex = 0; modelIndex < requestBodies.length && !result; modelIndex += 1) {
+      if (Date.now() >= analysisDeadline) break;
+      const requestBody = requestBodies[modelIndex];
       const remainingMs = analysisDeadline - Date.now();
       if (remainingMs <= 0) break;
       try {
         const candidate = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${apiKeys[keyIndex]}`,
+            Authorization: `Bearer ${openRouterApiKey}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://magisintel.nl',
             'X-Title': 'Papa voedingshulp'
@@ -134,7 +193,7 @@ export async function POST(request: Request) {
           lastStatus = candidate.status;
           sawRateLimit = sawRateLimit || candidate.status === 429;
           const detail = await candidate.text().catch(() => '');
-          console.error('OpenRouter food analysis failed', { model: requestBody.model, keySlot: keyIndex + 1, status: candidate.status, detail: detail.slice(0, 300) });
+          console.error('OpenRouter food analysis failed', { model: requestBody.model, status: candidate.status, detail: detail.slice(0, 300) });
           if (!RETRYABLE_UPSTREAM_STATUSES.has(candidate.status)) break;
           continue;
         }
@@ -161,19 +220,21 @@ export async function POST(request: Request) {
           contentLength: rawText.length,
           reasoningLength: reasoningText.length
         });
-        break;
       } catch (error) {
         lastStatus = 503;
-        console.error('OpenRouter food analysis request failed', { model: requestBody.model, keySlot: keyIndex + 1, error: error instanceof Error ? error.message : 'unknown error' });
+        console.error('OpenRouter food analysis request failed', { model: requestBody.model, error: error instanceof Error ? error.message : 'unknown error' });
       }
     }
   }
 
+  if (!result && !openRouterApiKey && !receivedUsableHttpResponse) {
+    return jsonResponse({ message: 'De foto-analyse is nog niet geconfigureerd.' }, 503);
+  }
   if (!result && !receivedUsableHttpResponse) {
     return jsonResponse({ message: sawRateLimit || lastStatus === 429 ? 'De gratis AI is even druk. Probeer het zo opnieuw.' : 'De foto-analyse kon niet worden uitgevoerd.' }, 502);
   }
   if (!result) {
-    console.error('OpenRouter food analysis returned no usable estimate after model fallbacks', { modelCount: models.length });
+    console.error('Food analysis returned no usable estimate after provider and model fallbacks', { modelCount: models.length });
     return jsonResponse({ message: 'De AI-providers gaven geen bruikbare schatting terug. Probeer het opnieuw; de foto zelf lijkt bruikbaar.' }, 502);
   }
   const safeResult = diet ? result : { ...result, dietFit: 'uncertain' as const, dietReason: 'Geen expliciete dieetregels opgegeven; daarom is de dieetcheck onzeker.' };

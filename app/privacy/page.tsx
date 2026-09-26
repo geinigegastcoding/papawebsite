@@ -141,8 +141,8 @@ export default function PrivacyPage() {
             </p>
             <p>
               Een foto wordt alleen doorgestuurd wanneer u op fotoanalyse drukt. Voor die ene analyse wordt de
-              foto naar de ingestelde OpenRouter-AI-provider gestuurd en niet door deze app opgeslagen. Een barcode
-              wordt via Open Food Facts opgezocht. Deze externe diensten verwerken verzoeken volgens hun eigen
+              foto naar de ingestelde AI-provider (OpenRouter of Cloudflare Workers AI) gestuurd en niet door deze
+              app opgeslagen. Een barcode wordt via Open Food Facts opgezocht. Deze externe diensten verwerken verzoeken volgens hun eigen
               voorwaarden; gebruik fotoanalyse daarom alleen met foto&apos;s die u daarvoor wilt delen.
             </p>
             <p>
