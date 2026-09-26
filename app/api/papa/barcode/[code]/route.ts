@@ -38,21 +38,35 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
   const code = (await params).code;
   if (!/^\d{8,14}$/.test(code)) return jsonResponse({ message: 'Ongeldige barcode.' }, 400);
 
-  const url = new URL(`https://world.openfoodfacts.org/api/v3/product/${code}`);
-  url.searchParams.set('product_type', 'food');
-  url.searchParams.set('cc', 'nl');
-  url.searchParams.set('lc', 'nl');
-  url.searchParams.set('fields', ['code', 'product_name', 'product_name_nl', 'generic_name', 'brands', 'quantity', 'serving_size', 'image_front_small_url', 'nutriments', 'allergens_tags', 'ingredients_text', 'ingredients_text_nl', 'labels_tags', 'categories_tags'].join(','));
-
-  const upstream = await fetch(url, {
-    headers: { 'User-Agent': 'MagisPapaPortal/0.1 (https://magisintel.nl; contact: jgmagis@hotmail.com)' },
-    cache: 'no-store'
-  });
-  if (upstream.status === 404) return jsonResponse({ message: 'Deze barcode staat niet in Open Food Facts.' }, 404);
-  if (!upstream.ok) return jsonResponse({ message: 'De productdatabase is tijdelijk niet bereikbaar.' }, 502);
-
-  const payload = await upstream.json().catch(() => null) as { product?: Record<string, unknown>; status?: number } | null;
-  const product = payload?.product;
+  const fields = ['code', 'product_name', 'product_name_nl', 'generic_name', 'brands', 'quantity', 'serving_size', 'image_front_small_url', 'nutriments', 'allergens_tags', 'ingredients_text', 'ingredients_text_nl', 'labels_tags', 'categories_tags'].join(',');
+  const endpoints = [
+    `https://world.openfoodfacts.org/api/v3/product/${code}?product_type=food&cc=nl&lc=nl&fields=${fields}`,
+    `https://nl.openfoodfacts.org/api/v2/product/${code}.json?product_type=food&cc=nl&lc=nl&fields=${fields}`
+  ];
+  let product: Record<string, unknown> | undefined;
+  let sawNotFound = false;
+  for (const endpoint of endpoints) {
+    try {
+      const upstream = await fetch(endpoint, {
+        headers: { 'User-Agent': 'MagisPapaPortal/0.1 (https://magisintel.nl; contact: jgmagis@hotmail.com)' },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(7000)
+      });
+      if (upstream.status === 404) {
+        sawNotFound = true;
+        continue;
+      }
+      if (!upstream.ok) continue;
+      const payload = await upstream.json().catch(() => null) as { product?: Record<string, unknown>; status?: number } | null;
+      if (payload?.product) {
+        product = payload.product;
+        break;
+      }
+    } catch {
+      // Try the regional API before returning a temporary database error.
+    }
+  }
+  if (!product) return jsonResponse({ message: sawNotFound ? 'Deze barcode staat niet in Open Food Facts.' : 'De productdatabase is tijdelijk niet bereikbaar.' }, sawNotFound ? 404 : 502);
   if (!product) return jsonResponse({ message: 'Geen productgegevens gevonden voor deze barcode.' }, 404);
 
   const nutriments = product.nutriments && typeof product.nutriments === 'object' ? product.nutriments as Nutriments : {};
