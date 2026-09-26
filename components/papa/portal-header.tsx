@@ -1,8 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export function PortalHeader() {
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('/papa/sw.js', { scope: '/papa/' }).catch((error) => {
+      console.warn('Papa PWA could not be registered', error);
+    });
+  }, []);
+
   const logout = async () => {
     await fetch('/api/papa/logout', { method: 'POST' });
     window.location.href = '/papa/login';

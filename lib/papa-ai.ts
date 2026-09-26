@@ -57,13 +57,16 @@ Return ONLY valid JSON with exactly these keys:
 
 All numeric values must be finite and non-negative. Keep rationale and assumptions short and concrete. Set needsReview to true when the photo hides meaningful ingredients, the calorie range is wide, or confidence is low.`;
 
-// OpenRouter supports at most three fallback entries in its `models` array.
-// Keep the list to free multimodal models that currently support structured output.
+// Keep a bounded shortlist of free multimodal models; OpenRouter still routes within each model.
 export const DEFAULT_FOOD_ANALYSIS_MODELS = [
-  'qwen/qwen3.8-27b:free',
+  'openrouter/free',
   'google/gemma-4-31b-it:free',
   'google/gemma-4-26b-a4b-it:free',
-  'openrouter/free'
+  'qwen/qwen3.8-27b:free',
+  'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+  'thinkingmachines/inkling-small:free',
+  'thinkingmachines/inkling:free',
+  'dots-studio/dots-3-note-preview:free'
 ] as const;
 
 export function getFoodAnalysisModels(primaryModel?: string, configuredModels?: string): string[] {
@@ -126,44 +129,89 @@ export function buildFoodAnalysisPrompt(description: string, diet: string): stri
 }
 
 function finiteNumber(value: unknown, maximum: number): number | null {
-  const numberValue = typeof value === 'number'
-    ? value
-    : typeof value === 'string' && /^\d+(?:\.\d+)?$/.test(value.trim())
-      ? Number(value.trim())
-      : null;
+  let numberValue: number | null = typeof value === 'number' ? value : null;
+  if (typeof value === 'string') {
+    const cleaned = value.trim().replace(/[~≈]/g, '').replace(/\s/g, '').replace(/[^\d,.+\-eE]/gi, '');
+    const normalized = cleaned.includes(',') && cleaned.includes('.')
+      ? cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.') ? cleaned.replace(/\./g, '').replace(',', '.') : cleaned.replace(/,/g, '')
+      : cleaned.replace(',', '.');
+    if (/^\d+(?:\.\d+)?$/.test(normalized)) numberValue = Number(normalized);
+  }
   return numberValue !== null && Number.isFinite(numberValue) && numberValue >= 0 && numberValue <= maximum ? numberValue : null;
 }
 
 function shortStrings(value: unknown, maximum: number): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim().slice(0, maximum)).slice(0, 12) : [];
+  const values = typeof value === 'string' ? [value] : Array.isArray(value) ? value : [];
+  return values.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim().slice(0, maximum)).slice(0, 12);
+}
+
+function unwrapAnalysis(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  for (const key of ['result', 'analysis', 'nutrition', 'data']) {
+    if (raw[key] && typeof raw[key] === 'object' && !Array.isArray(raw[key])) return unwrapAnalysis(raw[key]) ?? raw;
+  }
+  return raw;
 }
 
 export function parseFoodAnalysis(value: unknown): FoodAnalysis | null {
-  if (!value || typeof value !== 'object') return null;
-  const raw = value as Record<string, unknown>;
-  const range = raw.calorieRange && typeof raw.calorieRange === 'object' ? raw.calorieRange as Record<string, unknown> : null;
-  const estimatedCalories = finiteNumber(raw.estimatedCalories, 10000);
-  const low = finiteNumber(range?.low, 10000);
-  const high = finiteNumber(range?.high, 10000);
-  const proteinGrams = finiteNumber(raw.proteinGrams, 1000);
-  const carbGrams = finiteNumber(raw.carbGrams, 1000);
-  const fatGrams = finiteNumber(raw.fatGrams, 1000);
-  const fiberGrams = finiteNumber(raw.fiberGrams, 1000);
-  const confidence = raw.confidence === 'low' || raw.confidence === 'medium' || raw.confidence === 'high' ? raw.confidence : 'low';
-  const dietFit = raw.dietFit === 'yes' || raw.dietFit === 'no' || raw.dietFit === 'uncertain' ? raw.dietFit : 'uncertain';
-  const dietReason = typeof raw.dietReason === 'string' && raw.dietReason.trim() ? raw.dietReason.trim().slice(0, 500) : 'Geen expliciete dieetregels opgegeven; daarom is de dieetcheck onzeker.';
+  const raw = unwrapAnalysis(value);
+  if (!raw) return null;
+  const rangeValue = raw.calorieRange ?? raw.calorie_range ?? raw.calorie_range_kcal ?? raw.range;
+  const range: Record<string, unknown> | null = Array.isArray(rangeValue)
+    ? { low: rangeValue[0], high: rangeValue[1] }
+    : rangeValue && typeof rangeValue === 'object' ? rangeValue as Record<string, unknown> : null;
+  const estimatedCalories = finiteNumber(raw.estimatedCalories ?? raw.estimated_calories ?? raw.estimatedKcal ?? raw.totalCalories ?? raw.total_kcal ?? raw.calories ?? raw.kcal, 10000);
+  const derivedLow = estimatedCalories === null ? null : Math.max(0, Math.round(estimatedCalories * 0.75 / 10) * 10);
+  const derivedHigh = estimatedCalories === null ? null : Math.min(10000, Math.max(estimatedCalories, Math.round(estimatedCalories * 1.25 / 10) * 10));
+  const low = finiteNumber(range?.low ?? range?.minimum ?? raw.calorieRangeLow ?? raw.calorie_range_low, 10000) ?? derivedLow;
+  const high = finiteNumber(range?.high ?? range?.maximum ?? raw.calorieRangeHigh ?? raw.calorie_range_high, 10000) ?? derivedHigh;
+  const macros = raw.macros && typeof raw.macros === 'object' && !Array.isArray(raw.macros) ? raw.macros as Record<string, unknown> : {};
+  const proteinValue = finiteNumber(raw.proteinGrams ?? raw.protein_grams ?? raw.protein_g ?? raw.protein ?? macros.protein ?? macros.proteinGrams, 1000);
+  const carbValue = finiteNumber(raw.carbGrams ?? raw.carb_grams ?? raw.carbs ?? raw.carbohydrates ?? macros.carbs ?? macros.carbohydrates ?? macros.carbGrams, 1000);
+  const fatValue = finiteNumber(raw.fatGrams ?? raw.fat_grams ?? raw.fat_g ?? raw.fat ?? macros.fat ?? macros.fatGrams, 1000);
+  const fiberValue = finiteNumber(raw.fiberGrams ?? raw.fiber_grams ?? raw.fiber_g ?? raw.fiber ?? macros.fiber ?? macros.fiberGrams, 1000);
+  const incompleteMacros = [proteinValue, carbValue, fatValue, fiberValue].some((item) => item === null);
+  const proteinGrams = proteinValue ?? 0;
+  const carbGrams = carbValue ?? 0;
+  const fatGrams = fatValue ?? 0;
+  const fiberGrams = fiberValue ?? 0;
+  const confidenceValue = typeof (raw.confidence ?? raw.confidence_level) === 'string' ? String(raw.confidence ?? raw.confidence_level).toLowerCase() : '';
+  const confidence = confidenceValue === 'low' || confidenceValue === 'medium' || confidenceValue === 'high' ? confidenceValue : 'low';
+  const dietValue = raw.dietFit ?? raw.diet_fit ?? raw.diet_status;
+  const dietFit = dietValue === true || dietValue === 'yes' ? 'yes' : dietValue === false || dietValue === 'no' ? 'no' : 'uncertain';
+  const dietReasonValue = raw.dietReason ?? raw.diet_reason;
+  const dietReason = typeof dietReasonValue === 'string' && dietReasonValue.trim() ? dietReasonValue.trim().slice(0, 500) : 'Geen expliciete dieetregels opgegeven; daarom is de dieetcheck onzeker.';
   if ([estimatedCalories, low, high, proteinGrams, carbGrams, fatGrams, fiberGrams].some((item) => item === null) || low! > estimatedCalories! || estimatedCalories! > high!) return null;
 
-  const foods = Array.isArray(raw.foods) ? raw.foods.map((item) => {
-    if (!item || typeof item !== 'object') return null;
+  const foodValue = raw.foods ?? raw.ingredients ?? raw.items ?? raw.components;
+  const hasFoodList = raw.foods !== undefined || raw.ingredients !== undefined || raw.items !== undefined || raw.components !== undefined;
+  const foodItems = Array.isArray(foodValue) ? foodValue : foodValue && typeof foodValue === 'object' ? Object.entries(foodValue).map(([name, item]) => item && typeof item === 'object' ? { ...(item as Record<string, unknown>), name: (item as Record<string, unknown>).name ?? name } : { name, calories: item }) : [];
+  let incompleteFoodDetails = hasFoodList && foodItems.length === 0;
+  const foods = foodItems.map((item) => {
+    if (typeof item === 'string') {
+      incompleteFoodDetails = true;
+      return { name: item.trim().slice(0, 120), grams: 0, calories: 0, rationale: 'Provider noemde dit onderdeel zonder losse portie.' };
+    }
+    if (!item || typeof item !== 'object') {
+      incompleteFoodDetails = true;
+      return null;
+    }
     const food = item as Record<string, unknown>;
-    const name = typeof food.name === 'string' ? food.name.trim().slice(0, 120) : '';
-    const grams = finiteNumber(food.grams, 5000);
-    const calories = finiteNumber(food.calories, 10000);
-    const rationale = typeof food.rationale === 'string' ? food.rationale.trim().slice(0, 240) : '';
-    return name && grams !== null && calories !== null && rationale ? { name, grams, calories, rationale } : null;
-  }).filter((item): item is FoodAnalysisFood => item !== null).slice(0, 20) : [];
-  if (foods.length === 0) return null;
+    const nameValue = food.name ?? food.food ?? food.item;
+    const name = typeof nameValue === 'string' ? nameValue.trim().slice(0, 120) : '';
+    const grams = finiteNumber(food.grams ?? food.weight ?? food.amount, 5000);
+    const calories = finiteNumber(food.calories ?? food.kcal ?? food.energy, 10000);
+    const rationaleValue = food.rationale ?? food.reason ?? food.assumption;
+    const rationale = typeof rationaleValue === 'string' ? rationaleValue.trim().slice(0, 240) : 'Onderdeel van de zichtbare maaltijd.';
+    if (!name || calories === null) {
+      incompleteFoodDetails = true;
+      return null;
+    }
+    if (grams === null) incompleteFoodDetails = true;
+    return { name, grams: grams ?? 0, calories, rationale };
+  }).filter((item): item is FoodAnalysisFood => item !== null).slice(0, 20);
+  if (foods.length === 0) foods.push({ name: 'Totale zichtbare maaltijd', grams: 0, calories: Math.round(estimatedCalories!), rationale: 'De provider gaf geen losse componenten terug.' });
 
   return {
     estimatedCalories: Math.round(estimatedCalories!),
@@ -174,9 +222,13 @@ export function parseFoodAnalysis(value: unknown): FoodAnalysis | null {
     fiberGrams: Math.round(fiberGrams! * 10) / 10,
     foods,
     confidence,
-    assumptions: shortStrings(raw.assumptions, 240),
+    assumptions: [
+      ...shortStrings(raw.assumptions ?? raw.notes ?? raw.caveats, 240),
+      ...(incompleteMacros ? ['Niet alle macrovelden kwamen terug; controleer de schatting extra goed.'] : []),
+      ...(incompleteFoodDetails ? ['Niet alle maaltijdonderdelen hadden een losse portie; controleer de details extra goed.'] : [])
+    ].slice(0, 12),
     dietFit,
     dietReason,
-    needsReview: raw.needsReview === true || confidence === 'low' || high! - low! > Math.max(100, estimatedCalories! * 0.5)
+    needsReview: raw.needsReview === true || raw.needs_review === true || confidence === 'low' || incompleteMacros || incompleteFoodDetails || high! - low! > Math.max(100, estimatedCalories! * 0.5)
   };
 }

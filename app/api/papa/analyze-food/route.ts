@@ -1,11 +1,18 @@
 import { hasPapaSession } from '@/lib/papa-auth';
-import { buildFoodAnalysisPrompt, FOOD_ANALYSIS_RESPONSE_FORMAT, getFoodAnalysisModels, parseFoodAnalysis } from '@/lib/papa-ai';
+import { buildFoodAnalysisPrompt, getFoodAnalysisModels, parseFoodAnalysis } from '@/lib/papa-ai';
 
 export const dynamic = 'force-dynamic';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-const OPENROUTER_KEY_NAMES = ['OPENROUTER_API_KEY', 'OPENROUTER_API_KEY_2', 'OPENROUTER_API_KEY_3'] as const;
+const OPENROUTER_KEY_NAMES = [
+  'OPENROUTER_API_KEY',
+  'OPENROUTER_API_KEY_2',
+  'OPENROUTER_API_KEY_3',
+  'OPENROUTER_API_KEY_4',
+  'OPENROUTER_API_KEY_5',
+  'OPENROUTER_API_KEY_6'
+] as const;
 const RETRYABLE_UPSTREAM_STATUSES = new Set([401, 403, 408, 425, 429, 500, 502, 503, 504]);
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -22,12 +29,15 @@ function toBase64(buffer: ArrayBuffer): string {
 function modelText(content: unknown): string {
   if (typeof content === 'string') return content;
   if (content && typeof content === 'object' && !Array.isArray(content)) {
-    const objectContent = content as { parsed?: unknown; json?: unknown };
-    const parsed = objectContent.parsed ?? objectContent.json ?? content;
-    if (parsed && typeof parsed === 'object') return JSON.stringify(parsed);
+    const objectContent = content as { parsed?: unknown; json?: unknown; text?: unknown; content?: unknown; value?: unknown };
+    for (const candidate of [objectContent.text, objectContent.value, objectContent.content, objectContent.parsed, objectContent.json]) {
+      const text = modelText(candidate);
+      if (text) return text;
+    }
+    return JSON.stringify(content);
   }
   if (!Array.isArray(content)) return '';
-  return content.filter((part): part is { text: string } => Boolean(part && typeof part === 'object' && typeof (part as { text?: unknown }).text === 'string')).map((part) => part.text).join('\n');
+  return content.map((part) => modelText(part)).filter(Boolean).join('\n');
 }
 
 function extractJson(text: string): unknown {
@@ -73,9 +83,9 @@ export async function POST(request: Request) {
 
   const baseRequestBody = {
     temperature: 0.1,
-    max_tokens: 1800,
-    provider: { require_parameters: true, allow_fallbacks: true },
-    response_format: FOOD_ANALYSIS_RESPONSE_FORMAT,
+    max_tokens: 3000,
+    provider: { allow_fallbacks: true, require_parameters: true },
+    response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: buildFoodAnalysisPrompt(description, diet) },
       { role: 'user', content: [{ type: 'text', text: 'Analyse this food photo and return the required JSON only.' }, { type: 'image_url', image_url: { url: image } }] }
@@ -118,11 +128,12 @@ export async function POST(request: Request) {
         }
 
         receivedUsableHttpResponse = true;
-        const payload = await candidate.json().catch(() => null) as { model?: unknown; choices?: Array<{ finish_reason?: unknown; message?: { content?: unknown; parsed?: unknown } }> } | null;
+        const payload = await candidate.json().catch(() => null) as { model?: unknown; choices?: Array<{ finish_reason?: unknown; message?: { content?: unknown; parsed?: unknown; reasoning?: unknown } }> } | null;
         const message = payload?.choices?.[0]?.message;
         const rawText = modelText(message?.content);
+        const reasoningText = modelText(message?.reasoning ?? (message as { reasoning_content?: unknown } | undefined)?.reasoning_content);
         const parsedPayload = typeof message?.parsed === 'string' ? extractJson(message.parsed) : message?.parsed;
-        const parsedResult = parseFoodAnalysis(parsedPayload ?? extractJson(rawText));
+        const parsedResult = parseFoodAnalysis(parsedPayload ?? extractJson(rawText) ?? extractJson(reasoningText));
         if (parsedResult) {
           result = parsedResult;
           selectedModel = typeof payload?.model === 'string' ? payload.model : requestBody.model;
@@ -135,7 +146,8 @@ export async function POST(request: Request) {
           messageKeys: message && typeof message === 'object' ? Object.keys(message) : [],
           contentType: typeof message?.content,
           contentBlockCount: Array.isArray(message?.content) ? message.content.length : null,
-          contentLength: rawText.length
+          contentLength: rawText.length,
+          reasoningLength: reasoningText.length
         });
         break;
       } catch (error) {
