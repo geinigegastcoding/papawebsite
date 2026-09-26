@@ -108,12 +108,16 @@ test('portal keeps secrets server-side and protects its food routes', () => {
   assert.match(login, /path:\s*['"]\/['"]/);
   assert.doesNotMatch(analyze, /NEXT_PUBLIC_OPENROUTER/);
   assert.match(analyze, /hasPapaSession/);
+  assert.match(analyze, /JSON_MODE_MODELS/);
   assert.match(analyze, /response_format:\s*\{ type: 'json_object' \}/);
+  assert.match(analyze, /AbortSignal\.timeout/);
+  assert.match(analyze, /ANALYSIS_DEADLINE_MS/);
   assert.match(analyze, /OPENROUTER_API_KEY_2/);
   assert.match(analyze, /OPENROUTER_API_KEY_3/);
   assert.match(analyze, /OPENROUTER_API_KEY_6/);
   assert.match(analyze, /trying next model/);
   assert.match(ai, /dietFit: \{ type: 'string', enum: \['yes', 'no', 'uncertain'\] \}/);
   assert.match(barcode, /world\.openfoodfacts\.org\/api\/v3\/product/);
+  assert.match(barcode, /nl\.openfoodfacts\.org\/api\/v2\/product/);
   assert.match(barcode, /User-Agent/);
 });
