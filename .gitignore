@@ -14,3 +14,7 @@ tsconfig.tsbuildinfo
 .wrangler
 .dev.vars
 cloudflare-env.d.ts
+
+# Local redesign verification artifacts
+/.playwright-cli/
+/output/
