@@ -18,13 +18,15 @@ function sourceFiles(directory) {
   });
 }
 
-test("the homepage leads with a clear decision-focused promise and real next steps", () => {
+test("the redesigned homepage keeps the supplied promise and a real route to contact", () => {
   const homepage = read("app/page.tsx");
 
-  assert.match(homepage, /Zie wat uw data al vertelt\./);
+  assert.match(homepage, /Van ruwe data naar/);
+  assert.match(homepage, /bruikbare informatie/);
+  assert.match(homepage, /en gedegen advies\./);
   assert.match(homepage, /href="\/contact"/);
-  assert.match(homepage, /href="\/cases"/);
-  assert.match(homepage, /className="hero-canvas/);
+  assert.match(homepage, /href="#ervaringen"/);
+  assert.match(homepage, /className="intel-hero/);
 });
 
 test("all customer-facing imagery is owned by the project rather than generic stock URLs", () => {
@@ -39,6 +41,16 @@ test("all customer-facing imagery is owned by the project rather than generic st
   for (const asset of requiredAssets) {
     assert.equal(existsSync(join(projectRoot, asset)), true, `${asset} must be project-owned`);
   }
+});
+
+test("data diagrams use real web content and genuine file icons instead of reference screenshots", () => {
+  const homepage = read("app/page.tsx");
+  const site = read("app/site.tsx");
+
+  assert.doesNotMatch(homepage, /data-flow\.webp|data-clouds(?:-top)?\.webp/);
+  assert.match(homepage, /raw_export\.xlsx/);
+  assert.match(site, /\/icons\/excel\.svg/);
+  assert.ok(existsSync(join(projectRoot, "public/icons/excel.svg")));
 });
 
 test("images reserve layout space and only above-fold visuals load eagerly", () => {

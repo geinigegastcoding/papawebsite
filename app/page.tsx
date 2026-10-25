@@ -1,119 +1,96 @@
 import type { Metadata } from "next";
 
+import { ComparisonExample, ProcessExample } from "./data-examples";
 import { createPageMetadata } from "./metadata";
 import {
   ArrowIcon,
-  Credential,
+  FileIcon,
   Footer,
   Header,
-  Icon,
+  LogoMark,
   SiteImage,
-  credentials,
 } from "./site";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Magis Data Intelligence | Zie wat uw data vertelt",
+  title: "Van ruwe data naar inzicht | Magis Data Intelligence",
   description:
-    "Gerhard Magis vertaalt complexe data naar managementinformatie, heldere duiding en beslissingen die organisaties kunnen uitleggen.",
+    "Van ruwe data naar bruikbare informatie en gedegen advies. Gerhard Magis, PhD, helpt met scherpe data-analyses, rapportages en ondersteuning.",
   path: "/",
-  image: "/images/magis-signal-hero.webp",
-  socialTitle: "Zie wat uw data al vertelt | Magis Data Intelligence",
-  socialDescription: "Senior data-analyse en advies voor meer richting in complexe beslissingen.",
+  image: "/images/gerhard-cutout.webp",
+  socialTitle: "Van ruwe data naar bruikbare informatie en gedegen advies",
 });
 
-const signalPoints = [
-  ["01", "De vraag achter het cijfer"],
-  ["02", "De verklaring achter de afwijking"],
-  ["03", "De keuze achter het dashboard"],
-  ["04", "De taal die teams delen"],
+const experience = [
+  ["leiden", "Universiteit Leiden"],
+  ["imc", "IMC"],
+  ["achmea", "Achmea"],
+  ["zilveren-kruis", "Zilveren Kruis"],
+  ["zorg-en-zekerheid", "Zorg en Zekerheid"],
 ];
 
-const serviceLedger = [
-  {
-    number: "01",
-    title: "Data-analyse",
-    text: "Van patroon naar verklaring, met oog voor definities, kwaliteit en context.",
-    icon: "analysis",
-  },
-  {
-    number: "02",
-    title: "Managementinformatie",
-    text: "Rapportages die laten zien waar aandacht nodig is en welk gesprek moet volgen.",
-    icon: "dashboard",
-  },
-  {
-    number: "03",
-    title: "Risico- en kansenanalyse",
-    text: "Afwijkingen eerder herkennen en vertalen naar concrete scenario's en keuzes.",
-    icon: "shield",
-  },
-  {
-    number: "04",
-    title: "Strategisch advies",
-    text: "Een onafhankelijke vertaling van inzicht naar handelingsperspectief.",
-    icon: "target",
-  },
-  {
-    number: "05",
-    title: "Procesoptimalisatie",
-    text: "Zichtbaar maken waar informatie, uitvoering en besluitvorming elkaar vertragen.",
-    icon: "dashboard",
-  },
+const rawFiles = [
+  { name: "Rauw1.csv", type: "CSV", size: "12 MB" },
+  { name: "raw_export.xlsx", type: "XLSX", size: "8.4 MB" },
+  { name: "messy_data.json", type: "JSON", size: "4.1 MB" },
+  { name: "data_dump.txt", type: "TXT", size: "2.8 MB" },
+  { name: "legacy_db.csv", type: "DATABASE", size: "15 MB" },
 ];
-
-const processSteps = [
-  ["01", "Vraag", "Welke beslissing, prestatie of onzekerheid moet beter worden onderbouwd?"],
-  ["02", "Data", "Welke bronnen, definities en beperkingen bepalen wat we verantwoord kunnen zeggen?"],
-  ["03", "Analyse", "Welke patronen, verschillen en verklaringen zijn relevant voor de vraag?"],
-  ["04", "Richting", "Wat betekent dit voor beleid, proces, risico of prioriteit?"],
-  ["05", "Toepassing", "Hoe landt het inzicht in overleg, rapportage en dagelijks handelen?"],
+const cleanFiles = [
+  { name: "eind.xlsx", type: "XLSX", size: "1.2 MB" },
+  { name: "clean_report.csv", type: "CSV", size: "980 KB" },
+  { name: "dashboard-ready.xlsx", type: "XLSX", size: "1.5 MB" },
+  { name: "processed_data.csv", type: "CSV", size: "760 KB" },
+  { name: "clean_database.csv", type: "DATABASE", size: "2.1 MB" },
+];
+const dataTools = [
+  { type: "XLSX", label: "Excel" },
+  { type: "CSV", label: "CSV" },
+  { type: "DATABASE", label: "Data" },
+  { type: "CRM", label: "CRM" },
+  { type: "CHART", label: "Inzicht" },
 ];
 
 const recommendations = [
   {
+    name: "Marco Ruiter",
+    role: "Directeur Strategische Partnerships bij Dedimo",
+    date: "30 november 2016",
+    relation: "heeft met Gerhard in hetzelfde team gewerkt",
     quote:
-      "Gerhard kan zeer complexe data-analyses opzetten en begrijpelijk maken voor iedereen.",
+      "Gerhard is een super fijne collega om mee te werken. Hij is inhoudelijk sterk en hij is een erg prettig persoon in omgang. Gerhard heeft complexe tools gebouwd voor Zilveren Kruis waar nog steeds mee gewerkt wordt.",
+  },
+  {
     name: "Marieke Pronk",
     role: "Directeur Health Contracting & strategisch zorgadviseur",
+    date: "23 november 2016",
+    relation: "heeft met Gerhard in hetzelfde team gewerkt",
+    quote:
+      "Gerhard is een fijne collega waar je op kan bouwen. Hij is zeer gedreven en betrokken, kritisch als het moet. Hij kan zeer complexe data-analyses opzetten en begrijpelijk maken voor iedereen, kan van data een goudmijn maken.",
   },
   {
+    name: "Guus Mulder",
+    role: "Business Intelligence Specialist bij Zilveren Kruis",
+    date: "16 november 2016",
+    relation: "heeft met Gerhard in verschillende teams gewerkt",
     quote:
-      "Hij is inhoudelijk sterk, prettig in omgang en bouwde complexe tools waar nog steeds mee wordt gewerkt.",
-    name: "Marco Ruiter",
-    role: "Directeur Strategische Partnerships, Dedimo",
+      "Samen met Gerhard heb ik benchmarkinformatie voor zorgverleners van Zilveren Kruis geproduceerd. De samenwerking was prettig. Ik heb daarin Gerhard leren kennen als iemand die op hoog analytisch niveau een complex product kan maken. Dit product is nu overgedragen aan Vektis, branche-organisatie voor alle zorgverzekeraars.",
   },
   {
-    quote:
-      "Sterk in complexe problemen gestructureerd analyseren en haalbare oplossingen aandragen.",
     name: "Paul Wagenaar",
-    role: "Specialist digitale contractering",
+    role: "Specialist Digitale contractering bij Zilveren Kruis",
+    date: "8 november 2016",
+    relation: "heeft met Gerhard in hetzelfde team gewerkt",
+    quote:
+      "Gerhard is goed in het gestructureerd analyseren van complexe problemen en het aandragen van haalbare oplossingen. Daarnaast is Gerhard gewoon een heel aangenaam persoon om mee samen te werken :)",
   },
-];
-
-const sectors = [
-  "Zorgorganisaties",
-  "Verzekeraars & financiële dienstverlening",
-  "Overheid & publieke sector",
-  "Zakelijke dienstverlening",
-];
-
-const faqItems = [
-  [
-    "Moet onze data al op orde zijn?",
-    "Nee. Onduidelijke definities, ontbrekende gegevens en kwaliteitsvragen zijn vaak onderdeel van het echte vraagstuk. Die worden zichtbaar gemaakt voordat conclusies worden getrokken.",
-  ],
-  [
-    "Gaat het vooral om dashboards?",
-    "Alleen wanneer een dashboard de besluitvorming helpt. Soms is een scherpe analyse, second opinion of adviesnotitie waardevoller dan nog een rapportage.",
-  ],
-  [
-    "Kunnen kleine opdrachten ook?",
-    "Ja. Een afgebakende analyse of onafhankelijke blik kan snel duidelijk maken waar vervolgonderzoek wel of niet zinvol is.",
-  ],
-  [
-    "Hoe wordt met vertrouwelijke data gewerkt?",
-    "Toegang, opslag, gebruik en vertrouwelijkheid worden vooraf concreet afgesproken. Alleen informatie die voor de opdracht nodig is, wordt gebruikt.",
-  ],
+  {
+    name: "Sander van Ekeren",
+    role: "HR Executive | People Strategy, Performance & Talent | Leadership Development",
+    date: "8 november 2016",
+    relation: "gaf rechtstreeks leiding aan Gerhard",
+    quote:
+      "Gerhard is een meer dan uitstekende data-/informatie analist, met een liefde voor complexe vraagstukken. Naast zijn uitmuntende analytische vaardigheden, is hij zeer betrokken bij zijn werk en toont hij eigenaarschap op de momenten die er toe doen. Hij is de eerste die ik zal benaderen als ik een ingewikkeld datagerelateerd vraagstuk moet oplossen.",
+  },
 ];
 
 export default function Home() {
@@ -121,382 +98,302 @@ export default function Home() {
     <>
       <Header />
       <main id="main-content">
-        <HeroSection />
-        <SignalStrip />
-        <ManifestoSection />
-        <ServicesSection />
-        <ArtifactSection />
-        <ProcessSection />
-        <ProfileSection />
-        <ProofSection />
-        <FitAndFaqSection />
-        <FinalCta />
+        <section className="intel-hero" aria-labelledby="hero-title">
+          <div className="intel-hero-stage">
+            <div className="intel-hero-copy" data-reveal>
+              <h1 id="hero-title">
+                <span>Van ruwe data naar</span>
+                <span>bruikbare informatie</span>
+                <span>en gedegen advies.</span>
+              </h1>
+              <p>
+                Scherpe data-analyses, bruikbare adviezen en ondersteuning bij
+                elke stap.
+              </p>
+              <div className="hero-actions">
+                <a className="button button-primary" href="/contact">
+                  Neem contact op <ArrowIcon />
+                </a>
+                <a className="button button-dark" href="#ervaringen">
+                  Lees ervaringen
+                </a>
+              </div>
+            </div>
+            <div className="intel-portrait-wrap">
+              <SiteImage
+                className="intel-portrait"
+                src="/images/gerhard-cutout.webp"
+                alt="Gerhard Magis, PhD, data-analist en adviseur"
+                priority
+              />
+            </div>
+            <SiteImage
+              className="intel-road"
+              src="/images/gerhard-road.webp"
+              alt="Een klassieke Volvo-vrachtwagen, de J.G. Magis-lesauto en een rode tractor op een gebogen weg"
+              priority
+            />
+          </div>
+        </section>
+
+        <section
+          className="experience-section"
+          aria-labelledby="experience-title"
+        >
+          <div className="site-container" data-reveal>
+            <h2 id="experience-title">Ervaring bij:</h2>
+            <div className="experience-logos">
+              {experience.map(([id, name]) => (
+                <SiteImage
+                  key={id}
+                  src={`/images/experience-${id}.webp`}
+                  alt={name}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="data-flow-section"
+          id="diensten"
+          aria-labelledby="flow-title"
+        >
+          <div className="site-container data-flow-inner" data-reveal>
+            <h2 id="flow-title">Van rauwe naar bruikbare data</h2>
+            <div className="data-flow-grid">
+              <svg
+                className="flow-connections"
+                viewBox="0 0 1000 444"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                {[38, 130, 222, 314, 406].map((y, index) => (
+                  <g
+                    key={y}
+                    className={
+                      index === 1 ? "flow-path is-active" : "flow-path"
+                    }
+                  >
+                    <path d={`M220 ${y} C340 ${y} 335 222 425 222`} />
+                    <path d={`M575 222 C665 222 660 ${y} 780 ${y}`} />
+                    <circle cx="220" cy={y} r="3" />
+                    <circle cx="780" cy={y} r="3" />
+                  </g>
+                ))}
+              </svg>
+              <div className="flow-file-column">
+                <div className="flow-column-heading">
+                  <h3>Rauwe data</h3>
+                  <p>Losse bestanden, verschillende formaten</p>
+                </div>
+                <ul>
+                  {rawFiles.map((file, index) => (
+                    <li
+                      key={file.name}
+                      className={
+                        index === 1 ? "flow-file is-active" : "flow-file"
+                      }
+                    >
+                      <FileIcon type={file.type} />
+                      <div>
+                        <strong>{file.name}</strong>
+                        <span>
+                          {file.type === "DATABASE" ? "CSV" : file.type} ·{" "}
+                          {file.size}
+                        </span>
+                      </div>
+                      <span className="flow-file-more" aria-hidden="true">
+                        ···
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flow-center">
+                <div className="flow-brand-node">
+                  <LogoMark />
+                  <strong>MagisData</strong>
+                </div>
+                <p>
+                  Analyseren, opschonen
+                  <br /> en verbinden
+                </p>
+              </div>
+              <div className="flow-file-column">
+                <div className="flow-column-heading">
+                  <h3>Schone data</h3>
+                  <p>Gestructureerd en klaar voor gebruik</p>
+                </div>
+                <ul>
+                  {cleanFiles.map((file, index) => (
+                    <li
+                      key={file.name}
+                      className={
+                        index === 1 ? "flow-file is-active" : "flow-file"
+                      }
+                    >
+                      <FileIcon type={file.type} />
+                      <div>
+                        <strong>{file.name}</strong>
+                        <span>
+                          {file.type === "DATABASE" ? "CSV" : file.type} ·{" "}
+                          {file.size}
+                        </span>
+                      </div>
+                      <SiteImage
+                        className="flow-file-check"
+                        src="/icons/circle-check.svg"
+                        alt="Gecontroleerd"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <a className="text-link flow-link" href="/diensten">
+              Meer over de diensten <ArrowIcon />
+            </a>
+          </div>
+        </section>
+
+        <section
+          className="reviews-section"
+          id="ervaringen"
+          aria-labelledby="reviews-title"
+        >
+          <div className="site-container">
+            <div className="intel-section-heading" data-reveal>
+              <div>
+                <p className="eyebrow">Reviews</p>
+                <h2 id="reviews-title">
+                  Geloof niet alleen
+                  <br /> mijn woord.
+                </h2>
+              </div>
+              <p>
+                Hier zijn een paar aanbevelingen van mensen die met mij hebben
+                samengewerkt aan data- en analyseprojecten.
+              </p>
+            </div>
+            <div className="review-grid">
+              {recommendations.map((item) => (
+                <figure className="review-card" key={item.name} data-reveal>
+                  <span className="review-quote-mark" aria-hidden="true">
+                    “
+                  </span>
+                  <blockquote>{item.quote}</blockquote>
+                  <figcaption>
+                    <strong>{item.name}</strong>
+                    <span>{item.role}</span>
+                    <small>
+                      {item.date}, {item.relation}
+                    </small>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="process-example-section"
+          id="werkwijze"
+          aria-labelledby="process-title"
+        >
+          <div className="site-container">
+            <div className="intel-section-heading" data-reveal>
+              <h2 id="process-title">
+                Van eerste contact
+                <br /> tot bruikbare data.
+              </h2>
+              <p>
+                Een helder traject waarin we de vraag begrijpen, de situatie
+                analyseren, uitwerken en samen afronden.
+              </p>
+            </div>
+            <ProcessExample />
+          </div>
+        </section>
+
+        <ComparisonExample />
+
+        <section className="data-cta" aria-labelledby="data-cta-title">
+          <div className="cloud-ceiling" aria-hidden="true">
+            {Array.from({ length: 10 }, (_, index) => (
+              <span key={index} />
+            ))}
+          </div>
+          <div className="site-container data-cta-copy" data-reveal>
+            <h2 id="data-cta-title">Laat je data voor je werken.</h2>
+            <p>
+              Van losse bestanden naar heldere inzichten. Koppel bronnen,
+              <br className="desktop-break" /> structureer data en maak
+              rapportages die direct bruikbaar zijn.
+            </p>
+            <div className="data-cta-prompt">
+              <p>
+                Combineer deze Excel-, CSV- en CRM-data tot één betrouwbaar
+                overzicht en laat zien waar de grootste afwijkingen zitten.
+              </p>
+              <a className="button button-blue" href="#verschillen">
+                <LogoMark />
+                Bekijk voorbeeld <ArrowIcon />
+              </a>
+            </div>
+          </div>
+          <div className="data-output-art" aria-hidden="true">
+            <svg
+              className="data-tool-connection"
+              viewBox="0 0 1440 260"
+              preserveAspectRatio="none"
+            >
+              <path d="M40 240 C80 50 170 30 285 110 S430 40 560 100 S700 160 805 100 S1030 140 1140 90 S1350 80 1400 240" />
+            </svg>
+            <div className="data-tools">
+              {dataTools.map((tool) => (
+                <div
+                  className={`data-tool data-tool-${tool.type.toLowerCase()}`}
+                  key={tool.type}
+                >
+                  <FileIcon type={tool.type} />
+                  <span>{tool.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="cloud-character-row">
+              {Array.from({ length: 8 }, (_, index) => (
+                <div
+                  className={`cloud-character cloud-character-${index}`}
+                  key={index}
+                >
+                  <span className="cloud-body" />
+                  <span className="cloud-eyes">
+                    <i />
+                    <i />
+                  </span>
+                  <span className="cloud-legs">
+                    <i />
+                    <i />
+                  </span>
+                  {index !== 2 && index !== 7 && (
+                    <span className="cloud-prop">
+                      {index === 3 ? (
+                        <LogoMark />
+                      ) : (
+                        <FileIcon
+                          type={dataTools[index % dataTools.length].type}
+                        />
+                      )}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="hero-canvas" aria-labelledby="hero-title">
-      <SiteImage
-        className="hero-canvas-media"
-        src="/images/magis-signal-hero.webp"
-        alt="Gerhard Magis analyseert rapportages aan een werktafel"
-        priority
-      />
-      <div className="hero-canvas-shade" aria-hidden="true" />
-      <div className="hero-grain" aria-hidden="true" />
-
-      <div className="site-container hero-canvas-inner">
-        <div className="hero-statement" data-reveal>
-          <p className="eyebrow light">Senior data-analyse · managementinformatie · advies</p>
-          <h1 id="hero-title">Zie wat uw data al vertelt.</h1>
-          <p className="hero-lede">
-            Complexe cijfers worden pas waardevol wanneer mensen dezelfde betekenis zien en weten
-            welke keuze volgt.
-          </p>
-          <div className="hero-actions" aria-label="Belangrijkste acties">
-            <a className="button button-primary" href="/contact">
-              Start met uw vraag <ArrowIcon />
-            </a>
-            <a className="text-link text-link-light" href="/cases">
-              Bekijk typische vraagstukken <ArrowIcon />
-            </a>
-          </div>
-        </div>
-
-        <div className="hero-corner-note" data-reveal>
-          <span>Gerhard Magis, PhD</span>
-          <p>Data die niet ruist, maar richting geeft.</p>
-          <SignalTrace />
-        </div>
-
-        <a className="scroll-cue" href="#richting" aria-label="Scroll naar de volgende sectie">
-          <span>Scroll</span>
-          <i aria-hidden="true" />
-        </a>
-      </div>
-    </section>
-  );
-}
-
-function SignalStrip() {
-  return (
-    <section className="signal-strip" aria-label="Waar Magis scherpte brengt">
-      <div className="site-container signal-strip-grid">
-        {signalPoints.map(([number, text]) => (
-          <div key={number} className="signal-point" data-reveal>
-            <span>{number}</span>
-            <p>{text}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ManifestoSection() {
-  return (
-    <section id="richting" className="manifesto-section section-space">
-      <div className="site-container manifesto-grid">
-        <div className="section-rail" data-reveal>
-          <span>01</span>
-          <p>Waarom Magis</p>
-        </div>
-
-        <div className="manifesto-heading" data-reveal>
-          <p className="eyebrow">Van observatie naar betekenis</p>
-          <h2>
-            Van meer cijfers naar <em>minder twijfel.</em>
-          </h2>
-        </div>
-
-        <div className="manifesto-copy" data-reveal>
-          <p>
-            Een dashboard kan een afwijking tonen. Maar niet vanzelf waarom die ontstaat, welke
-            definitie erachter zit of welke keuze verstandig is.
-          </p>
-          <p>
-            Magis verbindt analyse met de organisatievraag. Zodat cijfers niet eindigen in een
-            rapport, maar beginnen aan een beter gesprek.
-          </p>
-          <a className="text-link" href="/werkwijze">
-            Bekijk de werkwijze <ArrowIcon />
-          </a>
-        </div>
-
-        <DecisionField />
-      </div>
-    </section>
-  );
-}
-
-function ServicesSection() {
-  return (
-    <section className="services-ledger section-space" aria-labelledby="services-title">
-      <div className="site-container">
-        <div className="services-heading" data-reveal>
-          <div>
-            <p className="eyebrow light">Diensten</p>
-            <h2 id="services-title">Vijf manieren om ruis terug te brengen.</h2>
-          </div>
-          <p>
-            Geen standaardpakket. De vorm volgt de beslissing die beter moet worden onderbouwd.
-          </p>
-        </div>
-
-        <div className="service-ledger-list">
-          {serviceLedger.map((service) => (
-            <a className="service-ledger-row" href="/diensten" key={service.number} data-reveal>
-              <span className="service-number">{service.number}</span>
-              <Icon name={service.icon} />
-              <h3>{service.title}</h3>
-              <p>{service.text}</p>
-              <span className="service-arrow" aria-hidden="true">
-                ↗
-              </span>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ArtifactSection() {
-  return (
-    <section className="artifact-section" aria-labelledby="artifact-title">
-      <SiteImage
-        className="artifact-image"
-        src="/images/magis-analysis-closeup.webp"
-        alt="Analysebladen waarop één blauwe lijn duidelijk wordt"
-      />
-      <div className="artifact-shade" aria-hidden="true" />
-      <div className="site-container artifact-layout">
-        <div className="artifact-copy" data-reveal>
-          <p className="eyebrow light">Een typisch omslagpunt</p>
-          <h2 id="artifact-title">Niet nog een dashboard. Eén scherper gesprek.</h2>
-          <p>
-            De grootste winst ontstaat vaak wanneer een veelheid aan indicatoren wordt teruggebracht
-            tot het patroon, de verklaring en de keuze die ertoe doen.
-          </p>
-          <a className="button button-paper" href="/cases">
-            Bekijk voorbeelden <ArrowIcon />
-          </a>
-        </div>
-
-        <div className="artifact-markers" aria-label="Van patroon naar keuze" data-reveal>
-          <span>Patroon</span>
-          <span>Verklaring</span>
-          <span>Keuze</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProcessSection() {
-  return (
-    <section className="process-section section-space" aria-labelledby="process-title">
-      <div className="site-container process-heading" data-reveal>
-        <p className="eyebrow">Werkwijze</p>
-        <h2 id="process-title">Eerst scherpte. Dan analyse. Dan richting.</h2>
-      </div>
-
-      <div className="site-container process-layout">
-        <div className="process-visual" data-reveal>
-          <ProcessMap />
-          <div className="process-visual-caption">
-            <span>Vraag</span>
-            <p>De rode draad blijft zichtbaar, ook wanneer de analyse complex wordt.</p>
-            <span>Besluit</span>
-          </div>
-        </div>
-
-        <div className="process-list">
-          {processSteps.map(([number, title, text]) => (
-            <article key={number} className="process-step" data-reveal>
-              <span>{number}</span>
-              <div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProfileSection() {
-  return (
-    <section className="profile-section section-space" aria-labelledby="profile-title">
-      <div className="site-container profile-layout">
-        <div className="profile-media" data-reveal>
-          <SiteImage
-            className="profile-session"
-            src="/images/magis-work-session.webp"
-            alt="Gerhard Magis licht een analyse toe tijdens een werksessie"
-          />
-          <SiteImage
-            className="profile-portrait"
-            src="/images/gerhard-portrait.webp"
-            alt="Portret van Gerhard Magis"
-          />
-          <p className="profile-side-note">De analyse is technisch. De uitkomst moet menselijk leesbaar zijn.</p>
-        </div>
-
-        <div className="profile-copy" data-reveal>
-          <p className="eyebrow">Gerhard Magis, PhD</p>
-          <h2 id="profile-title">Analytische diepgang zonder afstand.</h2>
-          <p>
-            Gerhard combineert een achtergrond in natuurkunde met ervaring als senior business
-            consultant. Hij beweegt tussen detail en bestuur: precies genoeg voor inhoudelijke teams,
-            helder genoeg voor management.
-          </p>
-          <div className="credential-list">
-            {credentials.map((credential) => (
-              <Credential key={credential}>{credential}</Credential>
-            ))}
-          </div>
-          <a className="text-link" href="/over-mij">
-            Meer over Gerhard <ArrowIcon />
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProofSection() {
-  return (
-    <section className="proof-section section-space" aria-labelledby="proof-title">
-      <div className="site-container proof-heading" data-reveal>
-        <p className="eyebrow light">Aanbevelingen van collega's en leidinggevenden</p>
-        <h2 id="proof-title">Vertrouwen dat niet uit een marketingtekst komt.</h2>
-      </div>
-
-      <div className="site-container quote-wall">
-        {recommendations.map((item, index) => (
-          <figure className={index === 0 ? "quote-card quote-card-featured" : "quote-card"} key={item.name} data-reveal>
-            <blockquote>“{item.quote}”</blockquote>
-            <figcaption>
-              <strong>{item.name}</strong>
-              <span>{item.role}</span>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function FitAndFaqSection() {
-  return (
-    <section className="fit-faq-section section-space" aria-labelledby="fit-title">
-      <div className="site-container fit-faq-grid">
-        <div className="fit-column" data-reveal>
-          <p className="eyebrow">Past dit bij uw organisatie?</p>
-          <h2 id="fit-title">Voor omgevingen waar een cijfer nooit alleen een cijfer is.</h2>
-          <div className="sector-list">
-            {sectors.map((sector, index) => (
-              <a href="/expertise" key={sector}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                {sector}
-                <ArrowIcon />
-              </a>
-            ))}
-          </div>
-        </div>
-
-        <div className="faq-column" data-reveal>
-          <p className="eyebrow">Veelgestelde vragen</p>
-          <div className="faq-list">
-            {faqItems.map(([question, answer]) => (
-              <details key={question} className="faq-item">
-                <summary>{question}</summary>
-                <p>{answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FinalCta() {
-  return (
-    <section className="final-cta" aria-labelledby="contact-title">
-      <SiteImage
-        src="/images/magis-analysis-closeup.webp"
-        alt=""
-        className="final-cta-image"
-        aria-hidden="true"
-      />
-      <div className="site-container final-cta-inner" data-reveal>
-        <p className="eyebrow light">Een inhoudelijk eerste gesprek</p>
-        <h2 id="contact-title">Welke beslissing verdient meer richting?</h2>
-        <p>
-          Breng de vraag, een dashboard of een terugkerende twijfel mee. Het eerste gesprek is
-          vrijblijvend en begint bij de inhoud.
-        </p>
-        <a className="button button-paper" href="/contact">
-          Plan een kennismaking <ArrowIcon />
-        </a>
-      </div>
-    </section>
-  );
-}
-
-function SignalTrace() {
-  return (
-    <svg className="signal-trace" viewBox="0 0 300 72" aria-hidden="true">
-      <path d="M1 53h42l18-21 22 13 30-34 28 42 25-20 24 7 34-24 25 18h40" />
-      <circle cx="113" cy="11" r="4" />
-      <circle cx="224" cy="16" r="4" />
-    </svg>
-  );
-}
-
-function DecisionField() {
-  return (
-    <div className="decision-field" data-reveal aria-label="Van meerdere signalen naar één duidelijke richting">
-      <div className="decision-field-labels" aria-hidden="true">
-        <span>Ruis</span>
-        <span>Richting</span>
-      </div>
-      <svg viewBox="0 0 760 340" role="img" aria-label="Lijnen komen samen in één duidelijk signaal">
-        <g className="field-grid">
-          <path d="M0 56h760M0 112h760M0 168h760M0 224h760M0 280h760" />
-          <path d="M126 0v340M252 0v340M378 0v340M504 0v340M630 0v340" />
-        </g>
-        <path className="field-line field-line-muted" d="M0 248 75 219 130 242 195 135 250 181 316 112 380 201 438 156 495 168 560 102 625 119 692 82 760 98" />
-        <path className="field-line" d="M0 289 75 260 130 273 195 208 250 221 316 170 380 177 438 142 495 146 560 109 625 105 692 71 760 72" />
-        <circle className="field-pulse" cx="692" cy="71" r="9" />
-      </svg>
-    </div>
-  );
-}
-
-function ProcessMap() {
-  return (
-    <svg className="process-map" viewBox="0 0 560 560" role="img" aria-label="Vijf stappen van vraag naar toepassing">
-      <circle className="map-ring" cx="280" cy="280" r="208" />
-      <circle className="map-ring map-ring-inner" cx="280" cy="280" r="122" />
-      <path className="map-path" d="M77 307c72-185 142-226 216-157 63 59 91 114 190 60" />
-      <g className="map-points">
-        <circle cx="84" cy="292" r="10" />
-        <circle cx="167" cy="166" r="10" />
-        <circle cx="280" cy="147" r="10" />
-        <circle cx="367" cy="229" r="10" />
-        <circle cx="483" cy="210" r="10" />
-      </g>
-      <circle className="map-center" cx="280" cy="280" r="36" />
-      <path className="map-cross" d="M255 280h50M280 255v50" />
-    </svg>
   );
 }

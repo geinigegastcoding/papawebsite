@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "@fontsource/manrope/latin.css";
 import "@fontsource/space-grotesk/latin.css";
 
@@ -6,6 +7,15 @@ import "./globals.css";
 import { MotionSystem } from "./motion";
 
 const siteUrl = "https://magisintel.nl";
+const lato = localFont({
+  src: [
+    { path: "../public/fonts/lato/lato-400.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/lato/lato-700.woff2", weight: "700", style: "normal" },
+    { path: "../public/fonts/lato/lato-900.woff2", weight: "900", style: "normal" },
+  ],
+  variable: "--font-lato",
+  display: "swap",
+});
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -16,7 +26,7 @@ const structuredData = {
       name: "Magis Data Intelligence",
       url: siteUrl,
       email: "jgmagis@hotmail.com",
-      logo: `${siteUrl}/favicon.svg`,
+      logo: `${siteUrl}/images/magis-mark.webp`,
       image: `${siteUrl}/images/magis-signal-hero.webp`,
       founder: { "@id": `${siteUrl}/#gerhard-magis` },
       areaServed: { "@type": "Country", name: "Nederland" },
@@ -73,7 +83,7 @@ export const metadata: Metadata = {
     description: "Senior data-analyse en advies voor beter onderbouwde beslissingen.",
     images: ["/images/magis-signal-hero.webp"],
   },
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: { url: "/images/magis-mark.webp", type: "image/webp" } },
 };
 
 export default function RootLayout({
@@ -83,7 +93,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl">
-      <body>
+      <body className={lato.variable}>
         <a className="skip-link" href="#main-content">
           Ga naar de inhoud
         </a>

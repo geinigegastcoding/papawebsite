@@ -1,6 +1,25 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const imageDimensions: Record<string, { width: number; height: number }> = {
+  "/images/gerhard-cutout.webp": { width: 820, height: 887 },
+  "/images/gerhard-road.webp": { width: 1672, height: 345 },
+  "/images/magis-mark.webp": { width: 256, height: 256 },
+  "/images/experience-leiden.webp": { width: 310, height: 135 },
+  "/images/experience-imc.webp": { width: 290, height: 105 },
+  "/images/experience-achmea.webp": { width: 365, height: 110 },
+  "/images/experience-zilveren-kruis.webp": { width: 330, height: 135 },
+  "/images/experience-zorg-en-zekerheid.webp": { width: 335, height: 135 },
+  "/icons/excel.svg": { width: 48, height: 48 },
+  "/icons/file-type-csv.svg": { width: 24, height: 24 },
+  "/icons/file-text.svg": { width: 24, height: 24 },
+  "/icons/file-type-pdf.svg": { width: 24, height: 24 },
+  "/icons/braces.svg": { width: 24, height: 24 },
+  "/icons/database.svg": { width: 24, height: 24 },
+  "/icons/chart-bar.svg": { width: 24, height: 24 },
+  "/icons/cloud.svg": { width: 24, height: 24 },
+  "/icons/circle-check.svg": { width: 24, height: 24 },
+  "/icons/search.svg": { width: 24, height: 24 },
+  "/icons/file-search.svg": { width: 24, height: 24 },
   "/images/gerhard-dashboard.webp": { width: 1600, height: 1000 },
   "/images/gerhard-portrait.webp": { width: 512, height: 512 },
   "/images/magis-analysis-closeup.webp": { width: 1536, height: 1024 },
@@ -36,6 +55,20 @@ export function SiteImage({ src, alt, priority = false, ...props }: SiteImagePro
       fetchPriority={priority ? "high" : "auto"}
     />
   );
+}
+
+const fileIcons: Record<string, string> = {
+  XLSX: "/icons/excel.svg",
+  CSV: "/icons/file-type-csv.svg",
+  JSON: "/icons/braces.svg",
+  DATABASE: "/icons/database.svg",
+  PDF: "/icons/file-type-pdf.svg",
+  CRM: "/icons/cloud.svg",
+  CHART: "/icons/chart-bar.svg",
+};
+
+export function FileIcon({ type }: { type: string }) {
+  return <span className={`file-icon file-icon-${type.toLowerCase()}`}><SiteImage src={fileIcons[type] ?? "/icons/file-text.svg"} alt="" /></span>;
 }
 
 export const navItems = [
@@ -85,44 +118,6 @@ export const expertise = [
   "Proces- en prestatieanalyse",
   "Data naar managementinformatie",
 ];
-
-const pageVisuals: Record<string, { src: string; alt: string; index: string }> = {
-  Diensten: {
-    src: "/images/magis-analysis-closeup.webp",
-    alt: "Analysebladen met een duidelijke blauwe trendlijn",
-    index: "01",
-  },
-  Werkwijze: {
-    src: "/images/magis-work-session.webp",
-    alt: "Gerhard Magis bespreekt een analyse tijdens een werksessie",
-    index: "02",
-  },
-  Expertise: {
-    src: "/images/magis-analysis-closeup.webp",
-    alt: "Gelaagde analyse op papier",
-    index: "03",
-  },
-  "Over mij": {
-    src: "/images/magis-signal-hero.webp",
-    alt: "Gerhard Magis aan het werk met data en rapportages",
-    index: "04",
-  },
-  Cases: {
-    src: "/images/magis-analysis-closeup.webp",
-    alt: "Datapatronen teruggebracht tot een heldere lijn",
-    index: "05",
-  },
-  Contact: {
-    src: "/images/magis-work-session.webp",
-    alt: "Inhoudelijk gesprek over data en besluitvorming",
-    index: "06",
-  },
-  Privacy: {
-    src: "/images/magis-analysis-closeup.webp",
-    alt: "Zorgvuldige analyse van informatie",
-    index: "07",
-  },
-};
 
 export function Header() {
   return (
@@ -175,16 +170,6 @@ export function Header() {
 export function Footer() {
   return (
     <footer className="site-footer">
-      <div className="site-container footer-lead" data-reveal>
-        <div>
-          <p className="eyebrow light">Magis Data Intelligence</p>
-          <h2>Een scherpe vraag is een goed begin.</h2>
-        </div>
-        <a className="text-link text-link-light" href="/contact">
-          Bespreek uw vraag <ArrowIcon />
-        </a>
-      </div>
-
       <div className="site-container footer-grid">
         <div className="footer-signature">
           <a className="brand" href="/" aria-label="Magis Data Intelligence home">
@@ -215,25 +200,18 @@ export function Footer() {
       <div className="site-container footer-bottom">
         <p>© 2026 Magis Data Intelligence</p>
         <a href="/privacy">Privacy</a>
-        <p>Van data naar richting.</p>
+        <p>Realisatie door <a href="https://magisdata.nl">MagisData</a></p>
       </div>
     </footer>
   );
 }
 
 export function PageHero({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
-  const visual = pageVisuals[eyebrow] ?? pageVisuals.Expertise;
-
   return (
     <section className="page-hero" aria-labelledby="page-title">
-      <SiteImage className="page-hero-image" src={visual.src} alt={visual.alt} priority />
-      <div className="page-hero-shade" aria-hidden="true" />
       <div className="site-container page-hero-inner">
-        <p className="page-index" aria-hidden="true">
-          {visual.index} / 07
-        </p>
         <div className="page-hero-copy" data-reveal>
-          <p className="eyebrow light">{eyebrow}</p>
+          <p className="eyebrow">{eyebrow}</p>
           <h1 id="page-title">{title}</h1>
           <p>{text}</p>
         </div>
@@ -322,12 +300,7 @@ export function Credential({ children }: { children: ReactNode }) {
 
 export function LogoMark() {
   return (
-    <svg className="logo-mark" viewBox="0 0 56 56" aria-hidden="true">
-      <rect x="1" y="1" width="54" height="54" rx="2" />
-      <path d="M11 38V18l17 13 17-13v20" />
-      <path className="logo-signal" d="M11 28h7l4-8 7 17 5-10h11" />
-      <circle cx="45" cy="27" r="2" />
-    </svg>
+    <SiteImage className="logo-mark" src="/images/magis-mark.webp" alt="" />
   );
 }
 

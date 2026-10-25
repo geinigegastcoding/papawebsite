@@ -1,0 +1,8 @@
+Excel product icon: Microsoft
+https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/brand-icons/product/svg/excel_48x1.svg
+Used by Microsoft's Office add-in examples:
+https://github.com/OfficeDev/Office-Add-in-samples/tree/main/Samples/excel-create-worksheet-from-web-site
+
+File, database, search, chart, check and cloud icons: Tabler Icons
+https://github.com/tabler/tabler-icons
+MIT license: tabler-LICENSE.txt
